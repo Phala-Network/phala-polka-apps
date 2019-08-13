@@ -74,6 +74,10 @@ export default class Api extends React.PureComponent<Props, State> {
 
     api = new ApiPromise({ provider, signer });
 
+    setTimeout(() => {
+      this.setState({isApiConnected: true});
+    }, 5000) // ???
+
     this.state = {
       api,
       isApiConnected: false,
@@ -96,14 +100,17 @@ export default class Api extends React.PureComponent<Props, State> {
     const { api } = this.state;
 
     api.on('connected', (): void => {
+      console.log('*** API IS CONNECTED !');
       this.setState({ isApiConnected: true });
     });
 
     api.on('disconnected', (): void => {
+      console.log('*** API IS DISCONNECTED !');
       this.setState({ isApiConnected: false });
     });
 
     api.on('ready', async (): Promise<void> => {
+      console.log('*** API IS READY!');
       try {
         await this.loadOnReady(api);
       } catch (error) {
