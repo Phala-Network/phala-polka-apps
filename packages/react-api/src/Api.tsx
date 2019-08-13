@@ -12,13 +12,14 @@ import React from 'react';
 import ApiPromise from '@polkadot/api/promise';
 import { isWeb3Injected, web3Accounts, web3Enable } from '@polkadot/extension-dapp';
 import defaults from '@polkadot/rpc-provider/defaults';
-import { WsProvider } from '@polkadot/rpc-provider';
 import { InputNumber } from '@polkadot/react-components/InputNumber';
 import keyring from '@polkadot/ui-keyring';
 import uiSettings from '@polkadot/ui-settings';
 import ApiSigner from '@polkadot/react-signer/ApiSigner';
 import { Text } from '@polkadot/types';
 import { formatBalance, isTestChain } from '@polkadot/util';
+
+import WasmProviderLite from './WasmProviderLite';
 
 import ApiContext from './ApiContext';
 
@@ -29,6 +30,7 @@ interface Props {
   queuePayload: QueueTxPayloadAdd;
   queueSetTxStatus: QueueTxMessageSetStatus;
   url?: string;
+  client: any;
 }
 
 interface State extends ApiProps {
@@ -53,19 +55,22 @@ export default class Api extends React.PureComponent<Props, State> {
   public constructor (props: Props) {
     super(props);
 
-    const { queuePayload, queueSetTxStatus, url } = props;
-    const provider = new WsProvider(url);
+    let { client } = props;
+
+    // TODO comment the following out
+    client.rpcSubscribe('{"method":"chain_subscribeNewHead","params":[],"id":1,"jsonrpc":"2.0"}',
+      (r: any) => console.log("[client] New chain head: " + r));
+    client
+      .rpcSend('{"method":"system_networkState","params":[],"id":1,"jsonrpc":"2.0"}')
+      .then((r: any) => console.log("[client] Network state: " + r));
+
+    const { queuePayload, queueSetTxStatus } = props;
+    const provider = new WasmProviderLite(client)
     const signer = new ApiSigner(queuePayload, queueSetTxStatus);
 
-    const setApi = (provider: ProviderInterface): void => {
-      api = new ApiPromise({ provider, signer });
-
-      this.setState({ api }, (): void => {
-        this.subscribeEvents();
-      });
-    };
-    const setApiUrl = (url: string = defaults.WS_URL): void =>
-      setApi(new WsProvider(url));
+    const setApiUrl = (url: string = defaults.WS_URL): void => {
+      console.warn('Api change ignored');
+    }
 
     api = new ApiPromise({ provider, signer });
 

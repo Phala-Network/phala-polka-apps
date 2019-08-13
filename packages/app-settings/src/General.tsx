@@ -100,41 +100,42 @@ class General extends React.PureComponent<Props, State> {
   }
 
   private renderEndpoint = (): React.ReactNode => {
-    const { t } = this.props;
-    const { isCustomNode, isUrlValid, settings: { apiUrl } } = this.state;
+    return null;
+    // const { t } = this.props;
+    // const { isCustomNode, isUrlValid, settings: { apiUrl } } = this.state;
 
-    return (
-      <>
-        <Toggle
-          asSwitch
-          className='settings--cutomToggle'
-          defaultValue={isCustomNode}
-          label={t('custom endpoint')}
-          onChange={this.onChangeCustom}
-        />
-        <div className='ui--row'>
-          {
-            isCustomNode
-              ? (
-                <Input
-                  defaultValue={apiUrl}
-                  isError={!isUrlValid}
-                  label={t('remote node/endpoint to connect to')}
-                  onChange={this.onChangeApiUrl}
-                />
-              )
-              : (
-                <Dropdown
-                  defaultValue={apiUrl}
-                  label={t('remote node/endpoint to connect to')}
-                  onChange={this.onChangeApiUrl}
-                  options={uiSettings.availableNodes}
-                />
-              )
-          }
-        </div>
-      </>
-    );
+    // return (
+    //   <>
+    //     <Toggle
+    //       asSwitch
+    //       className='settings--cutomToggle'
+    //       defaultValue={isCustomNode}
+    //       label={t('custom endpoint')}
+    //       onChange={this.onChangeCustom}
+    //     />
+    //     <div className='ui--row'>
+    //       {
+    //         isCustomNode
+    //           ? (
+    //             <Input
+    //               defaultValue={apiUrl}
+    //               isError={!isUrlValid}
+    //               label={t('remote node/endpoint to connect to')}
+    //               onChange={this.onChangeApiUrl}
+    //             />
+    //           )
+    //           : (
+    //             <Dropdown
+    //               defaultValue={apiUrl}
+    //               label={t('remote node/endpoint to connect to')}
+    //               onChange={this.onChangeApiUrl}
+    //               options={uiSettings.availableNodes}
+    //             />
+    //           )
+    //       }
+    //     </div>
+    //   </>
+    // );
   }
 
   private onChangeApiUrl = (apiUrl: string): void => {

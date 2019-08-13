@@ -21,6 +21,9 @@ import Queue from '@polkadot/react-components/Status/Queue';
 
 import Apps from './Apps';
 
+import { start_client, default as init } from './node_browser.js';
+import ws from './ws.js';
+
 const rootId = 'root';
 const rootElement = document.getElementById(rootId);
 
@@ -56,25 +59,38 @@ const theme = {
   theme: settings.uiTheme
 };
 
-ReactDOM.render(
-  <Suspense fallback='...'>
-    <Queue>
-      <QueueConsumer>
-        {({ queuePayload, queueSetTxStatus }): React.ReactNode => (
-          <Api
-            queuePayload={queuePayload}
-            queueSetTxStatus={queueSetTxStatus}
-            url={wsEndpoint}
-          >
-            <HashRouter>
-              <ThemeProvider theme={theme}>
-                <Apps />
-              </ThemeProvider>
-            </HashRouter>
-          </Api>
-        )}
-      </QueueConsumer>
-    </Queue>
-  </Suspense>,
-  rootElement
-);
+
+/* Load WASM */
+console.log('Loading WASM');
+init('./pkg/node_browser_bg.wasm').then(() => {
+  console.log('Successfully loaded WASM');
+
+  /* Build our client. */
+  console.log('Starting client');
+  let client = start_client(ws());
+  console.log('Client started');
+
+  ReactDOM.render(
+    <Suspense fallback='...'>
+      <Queue>
+        <QueueConsumer>
+          {({ queuePayload, queueSetTxStatus }): React.ReactNode => (
+            <Api
+              queuePayload={queuePayload}
+              queueSetTxStatus={queueSetTxStatus}
+              url={wsEndpoint}
+              client={client}
+            >
+              <HashRouter>
+                <ThemeProvider theme={theme}>
+                  <Apps />
+                </ThemeProvider>
+              </HashRouter>
+            </Api>
+          )}
+        </QueueConsumer>
+      </Queue>
+    </Suspense>,
+    rootElement
+  );
+});
