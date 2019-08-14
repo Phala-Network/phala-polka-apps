@@ -74,10 +74,6 @@ export default class Api extends React.PureComponent<Props, State> {
 
     api = new ApiPromise({ provider, signer });
 
-    setTimeout(() => {
-      this.setState({isApiConnected: true});
-    }, 5000) // ???
-
     this.state = {
       api,
       isApiConnected: false,

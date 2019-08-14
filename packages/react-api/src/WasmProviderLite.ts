@@ -53,8 +53,11 @@ export default class WasmProviderLite implements ProviderInterface {
     this.coder = new Coder();
     this.client = client;
 
-    this._isConnected = true;
-    this.emit('connected');
+    // Give subscribers time to subscribe
+    setTimeout(() => {
+      this._isConnected = true;
+      this.emit('connected');
+    });
   }
 
   /**
@@ -97,11 +100,7 @@ export default class WasmProviderLite implements ProviderInterface {
    * @param  {ProviderInterfaceEmitCb}  sub  Callback
    */
   public on(type: ProviderInterfaceEmitted, sub: ProviderInterfaceEmitCb): void {
-    if (type == 'connected') { // should be handled by eventemitter but somehow doesn't work TODO
-      sub();
-    } else {
-      this._eventemitter.on(type, sub);
-    }
+    this._eventemitter.on(type, sub);
   }
 
   /**
