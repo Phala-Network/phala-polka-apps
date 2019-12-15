@@ -19,6 +19,7 @@ import extrinsics from './extrinsics';
 import genericAsset from './generic-asset';
 import js from './js';
 import parachains from './parachains';
+import phala from './phala';
 import settings from './settings';
 import staking from './staking';
 import storage from './storage';
@@ -37,6 +38,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     claims,
     transfer,
     genericAsset,
+    phala,
     null,
     staking,
     democracy,
@@ -53,6 +55,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     claims,
     transfer,
     genericAsset,
+    phala,
     null,
     staking,
     democracy,
