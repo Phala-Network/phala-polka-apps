@@ -1,0 +1,21 @@
+.phala h2 {
+  border-left: solid 5px #f19135;
+  padding-left: 10px;
+  font-size: 18px;
+}
+
+.phala hr {
+  margin: 20px 0;
+  border-top: none;
+  /* border-top: 1px solid lightgrey; */
+}
+
+.phala .text-primary {
+  color: #f19135;
+}
+
+.phala .text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

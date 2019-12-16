@@ -20,16 +20,14 @@ import SummaryBar from './SummaryBar';
 import Transfer from './Transfer';
 import translate from './translate';
 import Items from './Items';
+import List from './List';
+import ViewItem from './ViewItem';
+
+import './index.css';
 
 // define our internal types
 interface Props extends AppProps, I18nProps {}
 
-function Main (): React.ReactElement {
-  return (<div>main</div>)
-}
-function List (): React.ReactElement {
-  return (<div>list</div>)
-}
 function Orders (): React.ReactElement {
   return (<div>orders</div>)
 }
@@ -40,7 +38,7 @@ function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props>
   return (
     // in all apps, the main wrapper is setup to allow the padding
     // and margins inside the application. (Just from a consistent pov)
-    <main className={className}>
+    <main className={`phala ${className}`}>
       <header>
         <Tabs
           basePath={basePath}
@@ -73,15 +71,15 @@ function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props>
       <Switch>
         <Route path={`${basePath}/list`} component={List} />
         <Route path={`${basePath}/orders`} component={Orders} />
+        <Route path={`${basePath}/item/:value`} component={ViewItem} />
         <Route path={`${basePath}/account`} render={(): React.ReactElement<{}> => (
           <AccountSelector onChange={setAccountId} />
         )} />
         <Route render={(): React.ReactElement<{}> => (
-          <Items />
+          <Items basePath={basePath}/>
         )} />
       </Switch>
       <SummaryBar />
-      <Transfer accountId={accountId} />
       
       <div>Current account id: {accountId}</div>
       // alice: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY

@@ -2,6 +2,7 @@ import { ApiProps } from '@polkadot/react-api/types';
 import { I18nProps } from '@polkadot/react-components/types';
 
 import React from 'react';
+import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 import { Button, Card, Grid, Label, Icon, Input, Rating } from 'semantic-ui-react';
 
@@ -15,9 +16,13 @@ interface DatasetProps extends ApiProps {
   item: Item;
 }
 
-function _Dataset ({ className, item }: DatasetProps): React.ReactElement | null {
+function _Dataset ({ basePath, className, item }: DatasetProps): React.ReactElement | null {
+  let history = useHistory();
+
+  console.log("_Dataset basePath: " + basePath);
   function handleClick() {
-    alert('clicked!');
+    const id = item.id;
+    history.push(`${basePath}/item/${id}`);
   }
   return (
     <Card onClick={handleClick} className={className} raised={false} as='div'>
@@ -28,7 +33,7 @@ function _Dataset ({ className, item }: DatasetProps): React.ReactElement | null
         <Grid>
           <Grid.Row>
             <Grid.Column width={10}>
-              <Rating maxRating={5} defaultRating={3} icon='star' />
+              <Rating maxRating={5} defaultRating={4} icon='star' />
             </Grid.Column>
             <Grid.Column width={6}>
               已消费123次
@@ -84,7 +89,7 @@ const data_items = [
   }
 ];
 
-function Items ({ className, t }: Props): React.ReactElement<Props> | null {
+function Items ({ basePath, className, t }: Props): React.ReactElement<Props> | null {
   return (
     <div className={className}>
       <h1>数据商品市场</h1>
@@ -105,7 +110,7 @@ function Items ({ className, t }: Props): React.ReactElement<Props> | null {
         </Grid.Row>
         <Grid.Row columns={2}>
           <Grid.Column floated='left'>
-            <Button primary><Icon name='add' />Primary</Button>
+            <Button primary><Icon name='add' />新建商品</Button>
           </Grid.Column>
           <Grid.Column floated='right' textAlign='right'>
             <Button primary>查询</Button>
@@ -114,15 +119,13 @@ function Items ({ className, t }: Props): React.ReactElement<Props> | null {
         </Grid.Row>
       </Grid>
 
-      <Grid stackable>
-        <Grid.Row columns={4}>{
-          data_items.map((i, idx) => (
-            <Grid.Column key={idx}>
-              <Dataset item={i} />
-            </Grid.Column>
-          ))
-        }</Grid.Row>
-      </Grid>
+      <Grid doubling stackable>{
+        data_items.map((i, idx) => (
+          <Grid.Column key={idx} width={4}>
+            <Dataset item={i} basePath={basePath} />
+          </Grid.Column>
+        ))
+      }</Grid>
     </div>
   )
 }
