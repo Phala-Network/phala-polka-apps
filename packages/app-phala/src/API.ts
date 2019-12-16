@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { Item, Order } from './Models'
+
 const pruntime = axios.create({
   baseURL: 'http://172.20.20.211:8001/',
   timeout: 5000,
@@ -24,21 +26,21 @@ async function query(request: string) {
   return result[request];
 }
 
-export async function getItems() {
+export async function getItems(): Promise<{items: Array<Item>}> {
   const result = await query('GetItems');
   return result;
 }
 
-export async function getItem(id: number) {
+export async function getItem(id: number): Promise<Item> {
   const result = await getItems();
   return result.items[id];
 }
 
-export async function getOrders() {
+export async function getOrders(): Promise<{orders: Array<Order>}> {
   return await query('GetOrders');
 }
 
-export async function getOrder(id: number) {
+export async function getOrder(id: number): Promise<Order> {
   const result = await getOrders();
   return result.orders[id];
 }

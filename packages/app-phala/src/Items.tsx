@@ -1,22 +1,25 @@
-import { ApiProps } from '@polkadot/react-api/types';
 import { I18nProps } from '@polkadot/react-components/types';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 import { Button, Card, Grid, Label, Icon, Input, Rating } from 'semantic-ui-react';
 
-import Item from './Models';
+import { Item } from './Models';
+import { getItems } from './API';
 
-interface Props extends ApiProps, I18nProps  {
+interface Props extends I18nProps  {
   accountId: string | null;
+  basePath: string
 }
 
-interface DatasetProps extends ApiProps {
+interface DatasetProps {
+  basePath: string,
+  className: string,
   item: Item;
 }
 
-function _Dataset ({ basePath, className, item }: DatasetProps): React.ReactElement | null {
+function _Dataset ({ basePath, className = '', item }: DatasetProps): React.ReactElement | null {
   let history = useHistory();
 
   console.log("_Dataset basePath: " + basePath);
@@ -66,30 +69,21 @@ const Dataset = styled(_Dataset)`
   }
 `;
 
-const data_items = [
-  {
-    "details": {
-      "category": "征信数据",
-      "dataset_link": "/ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG",
-      "dataset_preview": "id,phone,name,gender,income2018,income2017,remark\n1001001999010199993333,13010002000,张三,male,500000,450000,备注信息1\n2002002005010188884444,18090007000,李四,female,300000,300000,备注信息2\n",
-      "description": "[DEMO]本数据由北京市哈希森林公司合法渠道采集的1万条征信数据，包含用户身份证号、手机号、日常消费记录等30个字段，适用于征信模型训练、结果查询。",
-      "name": "北京市征信数据",
-      "price": {
-        "PerRow": {
-          "price": "10000000000000"
-        }
-      }
-    },
-    "id": 0,
-    "seller": "d43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d",
-    "txref": {
-      "blocknum": 6,
-      "index": 1
-    }
-  }
-];
-
 function Items ({ basePath, className, t }: Props): React.ReactElement<Props> | null {
+  let history = useHistory();
+  const [dataItems, setDataItems] = useState<Array<Item>>([]);
+
+  useEffect(() => {
+    (async () => {
+      const items = await getItems();
+      setDataItems(items.items);
+    })()
+  }, [])
+
+  function handleListDataset() {
+    history.push(`${basePath}/list`);
+  }
+
   return (
     <div className={className}>
       <h1>数据商品市场</h1>
@@ -110,7 +104,7 @@ function Items ({ basePath, className, t }: Props): React.ReactElement<Props> | 
         </Grid.Row>
         <Grid.Row columns={2}>
           <Grid.Column floated='left'>
-            <Button primary><Icon name='add' />新建商品</Button>
+            <Button primary onClick={handleListDataset}><Icon name='add' />新建商品</Button>
           </Grid.Column>
           <Grid.Column floated='right' textAlign='right'>
             <Button primary>查询</Button>
@@ -120,7 +114,7 @@ function Items ({ basePath, className, t }: Props): React.ReactElement<Props> | 
       </Grid>
 
       <Grid doubling stackable>{
-        data_items.map((i, idx) => (
+        dataItems.map((i, idx) => (
           <Grid.Column key={idx} width={4}>
             <Dataset item={i} basePath={basePath} />
           </Grid.Column>

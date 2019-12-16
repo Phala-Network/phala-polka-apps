@@ -16,6 +16,24 @@ export interface ItemDetals {
   price: {PerRow: {price: string}};
 }
 
+export interface Order {
+  buyer: string;
+  details: OrderDetails;
+}
+
+export interface OrderDetails {
+  item_id: number;
+  query_link: string;
+}
+
+export interface OrderState {
+  data_ready: boolean;
+  matched_rows: number;
+  query_ready: boolean;
+  result_path: string;
+  result_ready: boolean;
+}
+
 export interface TxRef {
   blocknum: number;
   index: number;

@@ -79,7 +79,10 @@ function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props>
           <Items basePath={basePath}/>
         )} />
       </Switch>
-      <SummaryBar />
+
+      <div style={{marginTop: 30}}>
+        <SummaryBar />
+      </div>
       
       <div>Current account id: {accountId}</div>
       // alice: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
