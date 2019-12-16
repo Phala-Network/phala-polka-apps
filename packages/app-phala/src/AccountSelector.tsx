@@ -20,6 +20,7 @@ function AccountSelector ({ className, onChange }: Props): React.ReactElement<Pr
 
   return (
     <section className={`template--AccountSelector ${className}`}>
+      <h1>选择区块链身份</h1>
       <Grid>
         <Grid.Row>
           <Grid.Column>
@@ -51,8 +52,4 @@ function AccountSelector ({ className, onChange }: Props): React.ReactElement<Pr
 
 export default styled(AccountSelector)`
   align-items: flex-end;
-
-  .summary {
-    text-align: center;
-  }
 `;
