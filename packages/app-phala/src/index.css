@@ -19,3 +19,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.phala .icon.ipfs {
+  vertical-align: middle;
+  max-height: 40px;
+}

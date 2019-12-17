@@ -13,7 +13,15 @@
     "@babel/runtime": "^7.7.5",
     "@polkadot/react-components": "^0.39.0-beta.7",
     "axios": "^0.19.0",
+    "cids": "^0.7.1",
+    "multihashing": "^0.3.3",
     "papaparse": "^5.1.0",
-    "react-dropzone": "^10.2.1"
+    "react-dropzone": "^10.2.1",
+    "react-hook-form": "^3.29.3",
+    "react-syntax-highlighter": "^12.2.1"
+  },
+  "devDependencies": {
+    "@types/papaparse": "^5.0.3",
+    "@types/react-syntax-highlighter": "^11.0.3"
   }
 }

@@ -3,12 +3,12 @@ import { I18nProps } from '@polkadot/react-components/types';
 
 import React, {useState, useEffect} from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import { Button, Form, Grid, Header, Label, Icon, Input, Rating, Segment, Table } from 'semantic-ui-react';
+import { Grid, Header, Icon, Rating, Table } from 'semantic-ui-react';
 import * as Papa from 'papaparse';
 
-import {Item, fmtAmount} from './Models';
-import {getItem} from './API';
+import { Item, fmtAmount } from './Models';
+import { getItem } from './API';
+import { genTablePreview } from './Utils';
 
 interface Props extends ApiProps, I18nProps {
 }
@@ -50,27 +50,8 @@ function genTable (csv: string) {
     return (<div>暂无预览</div>);
   }
   const header = dataset.data[0] as Array<string>;
-  let rows = dataset.data.slice(1) as Array<Array<string>>;
-  rows = rows.filter(r => r.length == header.length);
-  return (
-    <Table celled padded>
-      <Table.Header>
-        <Table.Row>
-          {header.map((h, idx) => (<Table.HeaderCell key={idx}>{h}</Table.HeaderCell>))}
-        </Table.Row>
-      </Table.Header>
-
-      <Table.Body>{
-        rows.map((r, ridx) => (
-          <Table.Row key={ridx}>{
-            r.map((v, vidx) => (
-              <Table.Cell key={vidx}>{v}</Table.Cell>
-            ))
-          }</Table.Row>
-        ))
-      }</Table.Body>
-    </Table>
-  )
+  const rows = dataset.data.slice(1) as Array<Array<string>>;
+  return genTablePreview(header, rows);
 }
 
 export default function ViewItem({className, t}: Props): React.ReactElement<Props> | null {

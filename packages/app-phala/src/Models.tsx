@@ -45,3 +45,7 @@ export function fmtAmount(amount: string) {
    const bigamount = new BN(amount)
    return bigamount.mul(b100).div(decimals).toNumber() / 100;
 }
+
+export function amountFromNL(amount_nl: number): string {
+  return new BN(amount_nl * 100).mul(decimals).div(b100).toString();
+}
