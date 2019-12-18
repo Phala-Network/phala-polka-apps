@@ -112,13 +112,11 @@ function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props>
         </Switch>
       </AppContext.Context.Provider>
 
-      <div style={{marginTop: 30}}>
+      {/* <div style={{marginTop: 30}}>
         <SummaryBar />
-      </div>
+        </div> */}
       
-      <div>Current account id: {accountId}</div>
-      // alice: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
-      // bob: 5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty
+      <div style={{color: '#eee'}}>账号状况: {accountId && '已登陆'}</div>
 
     </main>
   );
