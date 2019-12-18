@@ -15,6 +15,8 @@
     "axios": "^0.19.0",
     "cids": "^0.7.1",
     "downloadjs": "^1.4.7",
+    "ipfs-unixfs": "^0.2.0",
+    "ipld-dag-pb": "^0.18.1",
     "js-base64": "^2.5.1",
     "multihashing": "^0.3.3",
     "papaparse": "^5.1.0",

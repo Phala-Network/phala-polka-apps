@@ -3,8 +3,10 @@ import React from 'react';
 import styled from 'styled-components';
 import { Grid, Table } from 'semantic-ui-react';
 
-import CID from 'cids';
+import Unixfs from 'ipfs-unixfs';
+import { DAGNode } from 'ipld-dag-pb';
 import multihashing from 'multihashing';
+import CID from 'cids'
 
 export function genTablePreview (header: Array<string> | null, rows: Array<Array<string>> | null): React.ReactElement {
   if (!header || !rows) {
@@ -102,10 +104,15 @@ export function readTextFileAsync(file: File): Promise<string> {
 }
 
 export async function fileToIpfsPath (file: File): Promise<string> {
-  const buffer = await readFileAsync(file);
-  const hash = multihashing(buffer, 'sha2-256');
+  const arrayBuff = await readFileAsync(file);
+  const buffer = Buffer.from(arrayBuff);
+  const unixFs = new Unixfs('file', buffer);
+  const node = new DAGNode(unixFs.marshal());
+  const serialized = new Uint8Array(node.serialize());
+  const hash = multihashing(serialized, 'sha2-256');
   const cid = new CID(0, 'dag-pb', hash);
-  return '/ipfs/' + cid.toString();
+  
+  return '/ipfs/' + cid;
 }
 
 const accountToPubkey: {[key: string]: string} = {
