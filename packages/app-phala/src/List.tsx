@@ -1,11 +1,11 @@
-import { ApiProps } from '@polkadot/react-api/types';
-import { I18nProps } from '@polkadot/react-components/types';
+import { BlockNumber } from '@polkadot/types/interfaces';
+import { useApi, useCall } from '@polkadot/react-hooks';
 import { Modal, Button as PButton, TxButton, InputAddress } from '@polkadot/react-components';
 
 import React, {useEffect, useState, useCallback, useMemo} from 'react';
 import { useHistory } from "react-router-dom";
 import { useDropzone } from 'react-dropzone'
-import { Button, Form, Grid, Input, Select, TextArea } from 'semantic-ui-react';
+import { Button, Form, Grid, Input, Select } from 'semantic-ui-react';
 import * as Papa from 'papaparse';
 
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -13,9 +13,9 @@ import monokai from 'react-syntax-highlighter/dist/esm/styles/hljs/monokai';
 
 import useForm, { FormContext, useFormContext } from 'react-hook-form';
 
-import { UploadContainer, genTablePreview, fileToIpfsPath, readTextFileAsync } from './common/Utils';
-import { amountFromNL } from './common/Models'
-import { set as setFile } from './API';
+import { UploadContainer, genTablePreview, fileToIpfsPath, readTextFileAsync, isSamePerson, sleep } from './common/Utils';
+import { Item, amountFromNL } from './common/Models'
+import { set as setFile, getItems } from './API';
 
 import imgIpfsSvg from './assets/ipfs-logo-vector-ice-text.svg';
 
@@ -267,6 +267,12 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
     }
   }, [accountId]);
 
+  // submission
+
+  const { api } = useApi();
+  const [blockBeforeSubmit, setBlockBeforeSubmit] = useState<BlockNumber | undefined>(null);
+  const bestNumber = useCall<BlockNumber>(api.derive.chain.bestNumber, []);
+
   function onSubmit(values) {
     if (!datasetState.ipfs_path) {
       alert('请选择上传文件');
@@ -283,11 +289,33 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
     };
     console.log('# onsubmit', normalized);
     setPushCommand(normalized);
+    setBlockBeforeSubmit(bestNumber);
     setSubmitTxOpen(true);
   }
 
   function onClose() {
     setSubmitTxOpen(false);
+  }
+
+  //  onchain operation
+
+  async function handleSuccess() {
+    const refBlock = parseInt(blockBeforeSubmit!.toString());
+    console.log(`tx submitted. waiting block starting from ${refBlock}`)
+    let myItems: Array<Item> = [];
+    for (let i = 0; i < 20; i++) {
+      const { items } = await getItems();
+      myItems = items.filter((i) => (i.txref.blocknum > refBlock && isSamePerson(accountId!, i.seller)));
+      if (myItems.length > 0) {
+        // found!
+        const item = myItems[myItems?.length - 1];
+        history.push(`${basePath}/result/item/${item.id}`);
+        return;
+      }
+      console.log('waiting for item listing');
+      await sleep(500);
+    }
+    alert('创建商品超时');
   }
 
   return (
@@ -325,6 +353,7 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
               label='提交'
               params={[1, JSON.stringify(pushCommand)]}
               tx='execution.pushCommand'
+              onSuccess={handleSuccess}
             />
           </PButton.Group>
         </Modal.Actions>
