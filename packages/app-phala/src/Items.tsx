@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 import { Button, Card, Grid, Label, Icon, Input, Rating } from 'semantic-ui-react';
 
-import { Item } from './Models';
+import { Item } from './common/Models';
 import { getItems } from './API';
 
 interface Props extends I18nProps  {
@@ -48,7 +48,8 @@ function _Dataset ({ basePath, className = '', item }: DatasetProps): React.Reac
         <p>链上地址: {item.details.dataset_link}</p>
         <p>数据总数: 300万条</p>
         <p>数据大小: 2TB</p>
-        <p>数据描述: <Label as='a' color='red' size="tiny">仅限TEE</Label> <Label color='green' size="tiny">已上链</Label></p>
+        <Label as='a' color='red' size="tiny">仅限TEE</Label> <Label color='green' size="tiny">已上链</Label>
+        <p>数据描述: </p>
         <p style={{color: '#777', fontSize: 12}}>
           {item.details.description}
         </p>
@@ -115,7 +116,7 @@ function Items ({ basePath, className, t }: Props): React.ReactElement<Props> | 
 
       <Grid doubling stackable>{
         dataItems.map((i, idx) => (
-          <Grid.Column key={idx} width={4}>
+          <Grid.Column key={idx} width={5}>
             <Dataset item={i} basePath={basePath} />
           </Grid.Column>
         ))

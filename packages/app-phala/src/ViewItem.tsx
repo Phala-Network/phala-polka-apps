@@ -2,15 +2,16 @@ import { ApiProps } from '@polkadot/react-api/types';
 import { I18nProps } from '@polkadot/react-components/types';
 
 import React, {useState, useEffect} from 'react';
-import { useParams } from 'react-router-dom';
-import { Grid, Header, Icon, Rating, Table } from 'semantic-ui-react';
+import { useParams, useHistory } from 'react-router-dom';
+import { Grid, Header, Icon, Rating, Table, Button } from 'semantic-ui-react';
 import * as Papa from 'papaparse';
 
-import { Item, fmtAmount } from './Models';
+import { Item, fmtAmount } from './common/Models';
 import { getItem } from './API';
-import { genTablePreview } from './Utils';
+import { genTablePreview, genDataLabel, genDataLabels } from './common/Utils';
 
-interface Props extends ApiProps, I18nProps {
+interface Props {
+  basePath: string;
 }
 
 const defaultItem: Item = {
@@ -27,23 +28,6 @@ const defaultItem: Item = {
   },
 }
 
-function genDataLabel (name: string, value: string | React.ReactElement, rightClassName: string = '') {
-  return (
-    <Grid>
-      <Grid.Column width={5}>{name}</Grid.Column>
-      <Grid.Column width={11} className={rightClassName}>{value}</Grid.Column>
-    </Grid>
-  )
-}
-
-function genDataLabels (dict: Array<[string, string]>) {
-  return dict.map(([k, v]) => (
-    <Grid.Column width={5}>
-      {genDataLabel(k, v)}
-    </Grid.Column>
-  ))
-}
-
 function genTable (csv: string) {
   const dataset = Papa.parse(csv);
   if (dataset.errors.length > 0) {
@@ -54,7 +38,7 @@ function genTable (csv: string) {
   return genTablePreview(header, rows);
 }
 
-export default function ViewItem({className, t}: Props): React.ReactElement<Props> | null {
+export default function ViewItem({basePath}: Props): React.ReactElement<Props> | null {
   const [item, setItem] = useState<Item>(defaultItem);
   const { value } = useParams();
 
@@ -65,8 +49,13 @@ export default function ViewItem({className, t}: Props): React.ReactElement<Prop
     })();
   }, [value]);
 
+  const history = useHistory();
+  function handleBuy () {
+    history.push(`${basePath}/new_order/${value}`);
+  }
+
   return (
-    <div className={className}>
+    <div>
       <h1>数据商品详情</h1>
 
       <hr />
@@ -148,6 +137,12 @@ export default function ViewItem({className, t}: Props): React.ReactElement<Prop
           </Table.Row>
         </Table.Body>
       </Table>
+
+      <Grid>
+        <Grid.Row>
+          <Button floated='right' primary onClick={handleBuy}>购买</Button>
+        </Grid.Row>
+      </Grid>
 
     </div>
   )

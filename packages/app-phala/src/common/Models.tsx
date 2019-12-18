@@ -17,8 +17,11 @@ export interface ItemDetals {
 }
 
 export interface Order {
+  id: number;
   buyer: string;
+  txref: TxRef;
   details: OrderDetails;
+  state: OrderState;
 }
 
 export interface OrderDetails {
@@ -39,6 +42,11 @@ export interface TxRef {
   index: number;
 }
 
+export interface CsvTablePreview {
+  header: Array<string> | null;
+  rows: Array<Array<string>> | null;
+}
+
 const decimals = new BN("100000000000000"); // 1e14
 const b100 = new BN("100");
 export function fmtAmount(amount: string) {
@@ -48,4 +56,39 @@ export function fmtAmount(amount: string) {
 
 export function amountFromNL(amount_nl: number): string {
   return new BN(amount_nl * 100).mul(decimals).div(b100).toString();
+}
+
+export function defaultItem (): Item {
+  return {
+    id: 0,
+    seller: '',
+    txref: { blocknum: 0, index: 0},
+    details: {
+      category: 'null',
+      dataset_link: '/null',
+      dataset_preview: '',
+      description: '',
+      name: '',
+      price: {PerRow: {price: '0'}},
+    },
+  };
+}
+
+export function defaultOrder (): Order {
+  return {
+    id: 0,
+    buyer: '',
+    txref: { blocknum: 0, index: 0},
+    details: {
+      item_id: 0,
+      query_link: '/null'
+    },
+    state: {
+      data_ready: false,
+      matched_rows: 0,
+      query_ready: false,
+      result_path: '/null',
+      result_ready: false,
+    }
+  };
 }

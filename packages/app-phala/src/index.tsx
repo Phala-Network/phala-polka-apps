@@ -14,18 +14,25 @@ import React, { useState } from 'react';
 import { Route, Switch } from 'react-router';
 import Tabs from '@polkadot/react-components/Tabs';
 
-// local imports and components
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
+import sql from 'react-syntax-highlighter/dist/esm/languages/hljs/sql';
+
+SyntaxHighlighter.registerLanguage('javascript', js);
+SyntaxHighlighter.registerLanguage('sql', sql);
+
+import translate from './translate';
 import AccountSelector from './AccountSelector';
 import SummaryBar from './SummaryBar';
-import Transfer from './Transfer';
-import translate from './translate';
 import Items from './Items';
 import List from './List';
+import NewOrder from './NewOrder';
 import ViewItem from './ViewItem';
+import Result from './Result';
+import AppContext, { AppState } from './AppContext';
 
 import './index.css';
 
-// define our internal types
 interface Props extends AppProps, I18nProps {}
 
 function Orders (): React.ReactElement {
@@ -34,6 +41,7 @@ function Orders (): React.ReactElement {
 
 function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props> {
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [state, setState] = useState<AppState>(AppContext.default());
 
   return (
     // in all apps, the main wrapper is setup to allow the padding
@@ -68,17 +76,29 @@ function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props>
           ]}
         />
       </header>
-      <Switch>
-        <Route path={`${basePath}/list`} component={List} />
-        <Route path={`${basePath}/orders`} component={Orders} />
-        <Route path={`${basePath}/item/:value`} component={ViewItem} />
-        <Route path={`${basePath}/account`} render={(): React.ReactElement<{}> => (
-          <AccountSelector onChange={setAccountId} />
-        )} />
-        <Route render={(): React.ReactElement<{}> => (
-          <Items basePath={basePath}/>
-        )} />
-      </Switch>
+      <AppContext.Context.Provider value={{state, setState}}>
+        <Switch>
+          <Route path={`${basePath}/list`} render={(): React.ReactElement<{}> => (
+            <List basePath={basePath} accountId={accountId} />
+          )} />
+          <Route path={`${basePath}/new_order/:value`} render={(): React.ReactElement<{}> => (
+            <NewOrder basePath={basePath} accountId={accountId} />
+          )} />
+          <Route path={`${basePath}/orders`} component={Orders} />
+          <Route path={`${basePath}/item/:value`} render={(): React.ReactElement<{}> => (
+            <ViewItem basePath={basePath} />
+          )} />
+          <Route path={`${basePath}/account`} render={(): React.ReactElement<{}> => (
+            <AccountSelector onChange={setAccountId} />
+          )} />
+          <Route path={`${basePath}/result/:type/:value`} render={(): React.ReactElement<{}> => (
+            <Result basePath={basePath} accountId={accountId} />
+          )} />
+          <Route render={(): React.ReactElement<{}> => (
+            <Items basePath={basePath} />
+          )} />
+        </Switch>
+      </AppContext.Context.Provider>
 
       <div style={{marginTop: 30}}>
         <SummaryBar />

@@ -1,28 +1,23 @@
 import { ApiProps } from '@polkadot/react-api/types';
 import { I18nProps } from '@polkadot/react-components/types';
+import { Modal, Button as PButton, TxButton, InputAddress } from '@polkadot/react-components';
 
 import React, {useEffect, useState, useCallback, useMemo} from 'react';
-import styled from 'styled-components';
-import CID from 'cids';
-import multihashing from 'multihashing';
+import { useHistory } from "react-router-dom";
 import { useDropzone } from 'react-dropzone'
 import { Button, Form, Grid, Input, Select, TextArea } from 'semantic-ui-react';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import * as Papa from 'papaparse';
 
-import js from 'react-syntax-highlighter/dist/esm/languages/hljs/javascript';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import monokai from 'react-syntax-highlighter/dist/esm/styles/hljs/monokai';
+
 import useForm, { FormContext, useFormContext } from 'react-hook-form';
 
-import { genTablePreview} from './Utils';
-import { amountFromNL } from './Models'
+import { UploadContainer, genTablePreview, fileToIpfsPath } from './common/Utils';
+import { amountFromNL } from './common/Models'
 
 import imgIpfsSvg from './assets/ipfs-logo-vector-ice-text.svg';
 
-SyntaxHighlighter.registerLanguage('javascript', js);
-
-interface Props extends ApiProps, I18nProps {
-}
 
 const categories =  [
   { key: 'c1', value: '征信数据', text: '征信数据' },
@@ -37,36 +32,6 @@ const accoutingType = [
   { key: 'c2', value: 'c2', text: '类别二', disabled: true },
   { key: 'c3', value: 'c3', text: '类别三', disabled: true },
 ];
-
-const uploaderGetColor = (props: any) => {
-  if (props.isDragAccept) {
-      return '#00e676';
-  }
-  if (props.isDragReject) {
-      return '#ff1744';
-  }
-  if (props.isDragActive) {
-      return '#2196f3';
-  }
-  return '#eeeeee';
-}
-
-const UploadContainer = styled.div`
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60px 20px;
-  border-width: 2px;
-  border-radius: 2px;
-  border-color: ${props => uploaderGetColor(props)};
-  border-style: dashed;
-  background-color: #fafafa;
-  color: #bdbdbd;
-  outline: none;
-  transition: border .24s ease-in-out;
-  margin-bottom: 10px;
-`;
 
 function useFormUpdate(setValue: Function, triggerValidation: Function) {
   return async (e, { name, value }) => {
@@ -163,6 +128,7 @@ interface StepDetailsProps {
 }
 
 function StepDetails({dataset}: StepDetailsProps): React.ReactElement<StepDetailsProps> | null {
+  const history = useHistory();
   const { register, setValue, triggerValidation, errors, watch } = useFormContext();
   const formUpdate = useFormUpdate(setValue, triggerValidation);
   const [showRowPrice, setShowRowPrice] = useState(false);
@@ -192,13 +158,15 @@ function StepDetails({dataset}: StepDetailsProps): React.ReactElement<StepDetail
     setShowRowPrice(true);
   }
 
+  function handleCancel () {
+    history.goBack();
+  }
+
   useEffect(() => {
     register({ name: 'dataset_preview' }, {required: true});
     register({ name: 'price.PerRow.displayPrice', type: 'number' }, {required: true});
     register({ name: 'description' }, {required: true});
   }, []);
-
-  // const contractParams = '{"a": 123}';
 
   return (
     <>
@@ -255,35 +223,25 @@ function StepDetails({dataset}: StepDetailsProps): React.ReactElement<StepDetail
           </Grid.Column>
         </Grid.Row>
         <Grid.Row>
-          <Button type="submit" primary>发布</Button>
-          <Button secondary>返回</Button>
-        </Grid.Row>        
+          <Button type="submit" primary>下一步</Button>
+          <Button secondary onClick={handleCancel}>返回</Button>
+        </Grid.Row>
       </Grid>
     </>
   );
 }
 
-function readFileAsync(file: File): Promise<ArrayBuffer> {
-  return new Promise((resolve, reject) => {
-    let reader = new FileReader();
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = reject;
-    reader.readAsArrayBuffer(file);
-  })
+interface Props {
+  basePath: string;
+  accountId: string | null;
 }
 
-async function fileToIpfsPath (file: File): Promise<string> {
-  const buffer = await readFileAsync(file);
-  const hash = multihashing(buffer, 'sha2-256');
-  const cid = new CID(0, 'dag-pb', hash);
-  return '/ipfs/' + cid.toString();
-}
-
-export default function List({className, t}: Props): React.ReactElement<Props> | null {
+export default function List({basePath, accountId}: Props): React.ReactElement<Props> | null {
+  const history = useHistory();
   const formMethods = useForm();
   const [datasetState, setDatasetState] = useState<DatasetState>({header: null, rows: null, file: null, ipfs_path: ''});
+  const [submitTxOpen, setSubmitTxOpen] = useState<boolean>(false);
+  const [pushCommand, setPushCommand] = useState<Object>({});
 
   function handleDatasetReady(file: File) {
     Papa.parse(file, {
@@ -297,6 +255,12 @@ export default function List({className, t}: Props): React.ReactElement<Props> |
       }
     })
   }
+
+  useEffect(() => {
+    if (!accountId) {
+      history.push(`${basePath}/account`);
+    }
+  }, [accountId]);
 
   function onSubmit(values) {
     if (!datasetState.ipfs_path) {
@@ -313,10 +277,16 @@ export default function List({className, t}: Props): React.ReactElement<Props> |
       }
     };
     console.log('# onsubmit', normalized);
+    setPushCommand(normalized);
+    setSubmitTxOpen(true);
+  }
+
+  function onClose() {
+    setSubmitTxOpen(false);
   }
 
   return (
-    <div className={className}>
+    <div>
       <h1>新建商品</h1>
       <hr/>
       <FormContext {...formMethods}>
@@ -325,6 +295,35 @@ export default function List({className, t}: Props): React.ReactElement<Props> |
           <StepDetails dataset={datasetState} />
         </Form>
       </FormContext>
+
+      <Modal open={submitTxOpen} header='提交合约请求'>
+        <Modal.Content>
+          <InputAddress
+            className='medium'
+            defaultValue={accountId}
+            isDisabled
+            label='账号'
+          />
+        </Modal.Content>
+        <Modal.Actions>
+          <PButton.Group>
+            <PButton
+              icon='cancel'
+              isNegative
+              label='取消'
+              onClick={onClose}
+            />
+            <PButton.Or />
+            <TxButton
+              accountId={accountId}
+              icon='send'
+              label='提交'
+              params={[1, JSON.stringify(pushCommand)]}
+              tx='execution.pushCommand'
+            />
+          </PButton.Group>
+        </Modal.Actions>
+      </Modal>
     </div>
   )
 }

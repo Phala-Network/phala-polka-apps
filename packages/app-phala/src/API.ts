@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { Item, Order } from './Models'
+import { Item, Order } from './common/Models'
 
 const pruntime = axios.create({
   baseURL: 'http://172.20.20.211:8001/',
