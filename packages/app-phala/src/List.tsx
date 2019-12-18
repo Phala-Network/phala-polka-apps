@@ -146,8 +146,8 @@ function StepDetails({dataset}: StepDetailsProps): React.ReactElement<StepDetail
     delete formData['price.PerRow.displayPrice'];
     const p = {
       List: {
-        price: { PerRow: { displayPrice: amount } },
-        ...formData
+        ...formData,
+        price: { PerRow: { price: amount } }
       }
     };
     const json = JSON.stringify(p, undefined, 2);
@@ -273,7 +273,7 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
       return;
     }
     const { name, category, dataset_preview, description, price} = values;
-    const amount = amountFromNL(parseInt(price.PerRow.displayPrice));
+    const amount = amountFromNL(parseFloat(price.PerRow.displayPrice));
     const normalized = {
       List: {
         name, category, dataset_preview, description,
