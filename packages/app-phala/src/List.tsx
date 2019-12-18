@@ -13,8 +13,9 @@ import monokai from 'react-syntax-highlighter/dist/esm/styles/hljs/monokai';
 
 import useForm, { FormContext, useFormContext } from 'react-hook-form';
 
-import { UploadContainer, genTablePreview, fileToIpfsPath } from './common/Utils';
+import { UploadContainer, genTablePreview, fileToIpfsPath, readTextFileAsync } from './common/Utils';
 import { amountFromNL } from './common/Models'
+import { set as setFile } from './API';
 
 import imgIpfsSvg from './assets/ipfs-logo-vector-ice-text.svg';
 
@@ -246,11 +247,15 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
   function handleDatasetReady(file: File) {
     Papa.parse(file, {
       complete: async function (dataset) {
+        const ipfsPath = await fileToIpfsPath(file);
+        const fileData = await readTextFileAsync(file)
+        const result = await setFile(ipfsPath, fileData);
+        console.log('set file', ipfsPath, result);
         setDatasetState({
           header: dataset.data[0] as Array<string>,
           rows: dataset.data.slice(1, 10) as Array<Array<string>>,
           file: file,
-          ipfs_path: await fileToIpfsPath(file),
+          ipfs_path: ipfsPath,
         });
       }
     })

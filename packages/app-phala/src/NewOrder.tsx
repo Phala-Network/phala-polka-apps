@@ -1,5 +1,5 @@
-import { ApiProps } from '@polkadot/react-api/types';
-import { I18nProps } from '@polkadot/react-components/types';
+import { BlockNumber } from '@polkadot/types/interfaces';
+import { useApi, useCall } from '@polkadot/react-hooks';
 import { Modal, Button as PButton, TxButton, InputAddress } from '@polkadot/react-components';
 
 import React, {useEffect, useState, useCallback, useMemo} from 'react';
@@ -11,9 +11,9 @@ import * as Papa from 'papaparse';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import monokai from 'react-syntax-highlighter/dist/esm/styles/hljs/monokai';
 
-import { UploadContainer, genDataLabels, genTablePreview, fileToIpfsPath } from './common/Utils';
-import { Item, defaultItem, CsvTablePreview, fmtAmount } from './common/Models'
-import { getItem } from './API';
+import { UploadContainer, genDataLabels, genTablePreview, fileToIpfsPath, readTextFileAsync, sleep, isSamePerson } from './common/Utils';
+import { Item, defaultItem, CsvTablePreview, fmtAmount, Order } from './common/Models'
+import { getItem, set as setFile, getOrders } from './API';
 
 import imgIpfsSvg from './assets/ipfs-logo-vector-ice-text.svg';
 
@@ -62,6 +62,9 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
     if (!csvFile) return;
     (async () => {
       const ipfsPath = await fileToIpfsPath(csvFile);
+      const fileData = await readTextFileAsync(csvFile)
+      const result = await setFile(ipfsPath, fileData);
+      console.log('set file', ipfsPath, result);
       setPushCommandParams((p) => {
         const newp = {...p};
         newp.OpenOrder.query_link = ipfsPath;
@@ -87,6 +90,10 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
 
   // submit
 
+  const { api } = useApi();
+  const [blockBeforeSubmit, setBlockBeforeSubmit] = useState<BlockNumber | undefined>(null);
+  const bestNumber = useCall<BlockNumber>(api.derive.chain.bestNumber, []);
+
   function handleCancel () {
     history.goBack();
   }
@@ -103,11 +110,40 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
 
   const [submitTxOpen, setSubmitTxOpen] = useState<boolean>(false);
   function handleSubmitTx () {
-    // TODO: construct pushCommand
+    if (!bestNumber) {
+      alert('Substrate网络异常，无法获取最新区块高度');
+      return;
+    }
+    if (!csvFile) {
+      alert('请先上传文件');
+      return;
+    }
+    setBlockBeforeSubmit(bestNumber);
     setSubmitTxOpen(true);
   }
   function onClose() {
     setSubmitTxOpen(false);
+  }
+
+  //  onchain operation
+  
+  async function handleSuccess() {
+    const refBlock = parseInt(blockBeforeSubmit!.toString());
+    console.log(`tx submitted. waiting from ${refBlock}`)
+    let myOrders: Array<Order> = [];
+    for (let i = 0; i < 20; i++) {
+      const { orders } = await getOrders();
+      myOrders = orders.filter((o) => (o.txref.blocknum > refBlock && isSamePerson(accountId!, o.buyer)));
+      if (myOrders.length > 0) {
+        // found!
+        const order = myOrders[myOrders?.length - 1];
+        history.push(`${basePath}/result/order/${order.id}`);
+        return;
+      }
+      console.log('waiting for order creation');
+      await sleep(500);
+    }
+    alert('创建交易超时');
   }
 
   return (
@@ -252,6 +288,7 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
               label='提交'
               params={[1, JSON.stringify(pushCommandParams)]}
               tx='execution.pushCommand'
+              onSuccess={handleSuccess}
             />
           </PButton.Group>
         </Modal.Actions>

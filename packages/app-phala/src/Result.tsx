@@ -9,8 +9,11 @@ import { Button, Card, Grid, Label, Icon, Input, Progress, Table } from 'semanti
 import AppContext, { AppState } from './AppContext';
 import { TxButton, InputBalance, Button as PButton } from '@polkadot/react-components';
 
+import { sleep } from './common/Utils'
 import { Item, Order, defaultOrder, amountFromNL, fmtAmount } from './common/Models';
-import { getItem, getOrder } from './API';
+import { getItem, getOrder, get as getFile } from './API';
+
+import download from 'downloadjs';
 
 interface Props {
   accountId: string | null;
@@ -24,17 +27,14 @@ class StepDef {
   ops: Array<Function | null>;
   state: Array<StepState>
 
-  constructor(name: string, ops: Array<Function | null> = [null, null, null]) {
+  constructor(name: string, ops: Array<Function | null> = [null, null, null], completed = false) {
     this.name = name;
     this.ops = ops;
-    this.state = ops.map(o => o ? 'wait' : 'na');
+    this.state = ops.map(o => o ? (completed ? 'done' : 'wait') : 'na');
   }
 }
 
 const NullStep = new StepDef('');
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 function step(ms10, randAdd = 0.1) {
   const ms = Math.floor(ms10 * 100 * (1 + Math.random() * randAdd));
   return () => sleep(ms);
@@ -47,21 +47,21 @@ interface Progress {
 
 const CHAIN_TIME = 5;
 
-function createSteps(type: string): Array<StepDef> {
+function createSteps(type: string, complete = false): Array<StepDef> {
   if (type == 'item') {
     return [
-      new StepDef('加密数据集', [step(5), null, null]),
-      new StepDef('提交上链', [step(1), null, step(CHAIN_TIME)]),
-      new StepDef('上传数据', [step(5), step(10), null])
+      new StepDef('加密数据集', [step(5), null, null], complete),
+      new StepDef('提交上链', [step(1), null, step(CHAIN_TIME)], complete),
+      new StepDef('上传数据', [step(5), step(10), null], complete)
     ];
   } else {
     return [
-      new StepDef('加密查询', [step(5), null, null]),
-      new StepDef('提交上链', [step(1), null, step(CHAIN_TIME)]),
-      new StepDef('上传查询', [step(5), step(10), null]),
-      new StepDef('准备数据集', [null, step(5), null]),
-      new StepDef('执行计算', [null, step(10), null]),
-      new StepDef('加密结果', [null, step(5), null]),
+      new StepDef('加密查询', [step(5), null, null], complete),
+      new StepDef('提交上链', [step(1), null, step(CHAIN_TIME)], complete),
+      new StepDef('上传查询', [step(5), step(10), null], complete),
+      new StepDef('准备数据集', [null, step(5), null], complete),
+      new StepDef('执行计算', [null, step(10), null], complete),
+      new StepDef('加密结果', [null, step(5), null], complete),
     ];
   }
 }
@@ -108,10 +108,10 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
       finished = app.state.orders;
     }
     console.log('result!', type, value);
-    const steps = createSteps(type);
-    console.log(steps);
+    const completed = finished.indexOf(id) >= 0;
+    const steps = createSteps(type, completed);
     const p = {
-      cursor: finished.indexOf(id) >= 0 ? steps.length : 0,
+      cursor: completed ? steps.length : 0,
       steps
     };
     setProgress(p);
@@ -160,9 +160,9 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
     });
   }
 
-  function handleDownload() {
-    // TODO
-    alert(order.state.result_path);
+  async function handleDownload() {
+    const content = await getFile(order.state.result_path);
+    download(content, `order-${order.id}-result.csv`, 'text/csv');
   }
 
   return (
@@ -254,14 +254,15 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
               </PButton.Group>
             </div>
           ) : (
-            <Button onClick={handleDownload} primary disabled={percent != '100'}>下载结果</Button>
+            <>
+              <p><Icon color='green' name='check circle' /> 已支付</p>
+              <Button onClick={handleDownload} primary disabled={percent != '100'}>下载结果</Button>
+            </>
           )}
 
-          <p>link: {JSON.stringify(order)}</p>
+          {/* <p>link: {JSON.stringify(order)}</p> */}
         </>
       )}
-
-
 
 
     </div>

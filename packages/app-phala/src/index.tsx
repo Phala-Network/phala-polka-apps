@@ -33,11 +33,23 @@ import AppContext, { AppState } from './AppContext';
 
 import './index.css';
 
-interface Props extends AppProps, I18nProps {}
-
+import { getOrders } from './API';
 function Orders (): React.ReactElement {
-  return (<div>orders</div>)
+
+  const [ orders, setOrders ] = React.useState([]);
+  React.useEffect(() => {
+    (async() => {
+      const { orders } = await getOrders();
+      setOrders(orders);
+    })();
+  }, []);
+
+  return (<div>
+    {JSON.stringify(orders)}
+  </div>)
 }
+
+interface Props extends AppProps, I18nProps {}
 
 function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props> {
   const [accountId, setAccountId] = useState<string | null>(null);

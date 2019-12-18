@@ -90,9 +90,35 @@ function readFileAsync(file: File): Promise<ArrayBuffer> {
   })
 }
 
+export function readTextFileAsync(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = reject;
+    reader.readAsText(file);
+  })
+}
+
 export async function fileToIpfsPath (file: File): Promise<string> {
   const buffer = await readFileAsync(file);
   const hash = multihashing(buffer, 'sha2-256');
   const cid = new CID(0, 'dag-pb', hash);
   return '/ipfs/' + cid.toString();
+}
+
+const accountToPubkey: {[key: string]: string} = {
+  // alice
+  '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY': 'd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
+  // bob
+  '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty': '8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48',
+}
+
+export function isSamePerson(accountId: string, pubkey: string): boolean {
+  return accountToPubkey[accountId] == pubkey;
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

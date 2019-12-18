@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Base64 } from 'js-base64';
 
 import { Item, Order } from './common/Models'
 
@@ -43,4 +44,16 @@ export async function getOrders(): Promise<{orders: Array<Order>}> {
 export async function getOrder(id: number): Promise<Order> {
   const result = await getOrders();
   return result.orders[id];
+}
+
+export async function set(path: string, data: string) {
+  return await req('set', {
+    path,
+    data: Base64.encode(data)
+  })
+}
+
+export async function get(path: string) {
+  const result = await req('get', {path});
+  return Base64.decode(result.value);
 }
