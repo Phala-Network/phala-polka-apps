@@ -17,7 +17,7 @@ export default ([
       ]
     },
     i18n: {
-      defaultValue: 'Phala数据市场'
+      defaultValue: 'Web3数据市场'
     },
     icon: 'microchip',
     name: 'Phala'
