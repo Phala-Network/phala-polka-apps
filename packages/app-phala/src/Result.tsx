@@ -9,8 +9,8 @@ import { Button, Card, Grid, Label, Icon, Input, Progress, Table } from 'semanti
 import AppContext, { AppState } from './AppContext';
 import { TxButton, InputBalance, Button as PButton } from '@polkadot/react-components';
 
-import { sleep } from './common/Utils'
-import { Item, Order, defaultOrder, amountFromNL, fmtAmount } from './common/Models';
+import { sleep, pubkeyToAccount } from './common/Utils'
+import { Item, Order, defaultOrder } from './common/Models';
 import { getItem, getOrder, get as getFile } from './API';
 
 import download from 'downloadjs';
@@ -35,8 +35,8 @@ class StepDef {
 }
 
 const NullStep = new StepDef('');
-function step(ms10, randAdd = 0.1) {
-  const ms = Math.floor(ms10 * 100 * (1 + Math.random() * randAdd));
+function step(ms100, randAdd = 0.1) {
+  const ms = Math.floor(ms100 * 100 * (1 + Math.random() * randAdd));
   return () => sleep(ms);
 }
 
@@ -60,6 +60,7 @@ function createSteps(type: string, complete = false): Array<StepDef> {
       new StepDef('提交上链', [step(1), null, step(CHAIN_TIME)], complete),
       new StepDef('上传查询', [step(5), step(10), null], complete),
       new StepDef('准备数据集', [null, step(5), null], complete),
+      new StepDef('等待卖家审核', [null, null, step(200)], complete),
       new StepDef('执行计算', [null, step(10), null], complete),
       new StepDef('加密结果', [null, step(5), null], complete),
     ];
@@ -97,6 +98,7 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
   });
   const [amount, setAmount] = React.useState<BN | undefined>(undefined);
   const [order, setOrder] = React.useState<Order>(defaultOrder());
+  const [payee, setPayee] = React.useState<string>('5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY'); // to //Alice
 
   const id = parseInt(value);
 
@@ -149,6 +151,7 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
       const rows = new BN(o.state.matched_rows);
       const toPay = new BN(i.details.price.PerRow.price).mul(rows);
       setAmount(toPay);
+      setPayee(pubkeyToAccount[i.seller])
     }
   }
 
@@ -239,7 +242,7 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
             <div>
               <InputBalance
                 label='需要支付'
-                value={amount}
+                defaultValue={amount}
                 isDisabled
               />
               <PButton.Group>
@@ -247,7 +250,7 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
                   accountId={props.accountId}
                   icon='send'
                   label='支付'
-                  params={['5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', amount]}
+                  params={[payee, amount]}
                   tx='balances.transfer'
                   onSuccess={() => {setPaid()}}
                 />

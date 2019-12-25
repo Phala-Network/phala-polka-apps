@@ -115,11 +115,25 @@ export async function fileToIpfsPath (file: File): Promise<string> {
   return '/ipfs/' + cid;
 }
 
-const accountToPubkey: {[key: string]: string} = {
+export const accountToPubkey: {[key: string]: string} = {
   // alice
   '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY': 'd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
   // bob
   '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty': '8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48',
+}
+
+export const pubkeyToAccount: {[key: string]: string} = {
+  // alice
+  'd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d': '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+  // bob
+  '8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48': '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
+}
+
+export const pubkeyToCompany: {[key: string]: string} = {
+  // alice
+  'd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d': '烧钱的独角兽',
+  // bob
+  '8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a48': 'Zuckbook Inc',
 }
 
 export function isSamePerson(accountId: string, pubkey: string): boolean {

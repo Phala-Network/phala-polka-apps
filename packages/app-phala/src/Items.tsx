@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { Button, Card, Grid, Label, Icon, Input, Rating } from 'semantic-ui-react';
 
 import { Item } from './common/Models';
+import { pubkeyToCompany } from './common/Utils';
 import { getItems } from './API';
 
 interface Props extends I18nProps  {
@@ -44,7 +45,7 @@ function _Dataset ({ basePath, className = '', item }: DatasetProps): React.Reac
           </Grid.Row>
         </Grid>
         <br/>
-        <p>商户: 哈希森林网络有限公司</p>
+        <p>商户: {pubkeyToCompany[item.seller]}</p>
         <p>链上地址: {item.details.dataset_link}</p>
         <p>数据总数: 300万条</p>
         <p>数据大小: 2TB</p>

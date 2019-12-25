@@ -98,7 +98,7 @@ function PhalaApp ({ basePath, className, t }: Props): React.ReactElement<Props>
           )} />
           <Route path={`${basePath}/orders`} component={Orders} />
           <Route path={`${basePath}/item/:value`} render={(): React.ReactElement<{}> => (
-            <ViewItem basePath={basePath} />
+            <ViewItem basePath={basePath} accountId={accountId} />
           )} />
           <Route path={`${basePath}/account`} render={(): React.ReactElement<{}> => (
             <AccountSelector onChange={setAccountId} />

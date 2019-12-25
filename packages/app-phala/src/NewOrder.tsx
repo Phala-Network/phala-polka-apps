@@ -11,7 +11,7 @@ import * as Papa from 'papaparse';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import monokai from 'react-syntax-highlighter/dist/esm/styles/hljs/monokai';
 
-import { UploadContainer, genDataLabels, genTablePreview, fileToIpfsPath, readTextFileAsync, sleep, isSamePerson } from './common/Utils';
+import { UploadContainer, genDataLabels, genTablePreview, fileToIpfsPath, readTextFileAsync, sleep, isSamePerson, pubkeyToCompany } from './common/Utils';
 import { Item, defaultItem, CsvTablePreview, fmtAmount, Order } from './common/Models'
 import { getItem, set as setFile, getOrders } from './API';
 
@@ -162,7 +162,7 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
           ['ID', (10000 + item.id).toString()],
           ['数据总数', '1万条'],
           ['价格', fmtAmount(item.details.price.PerRow.price) + ' 元/条'],
-          ['商户', '北京哈希森林科技有限公司'],
+          ['商户', pubkeyToCompany[item.seller]],
           ['数据大小', '2TB']
         ])}
       </Grid>

@@ -1,17 +1,18 @@
 import { ApiProps } from '@polkadot/react-api/types';
 import { I18nProps } from '@polkadot/react-components/types';
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Grid, Header, Icon, Rating, Table, Button } from 'semantic-ui-react';
 import * as Papa from 'papaparse';
 
 import { Item, fmtAmount } from './common/Models';
 import { getItem } from './API';
-import { genTablePreview, genDataLabel, genDataLabels } from './common/Utils';
+import { genTablePreview, genDataLabel, genDataLabels, isSamePerson, pubkeyToCompany } from './common/Utils';
 
 interface Props {
   basePath: string;
+  accountId: string | undefined;
 }
 
 const defaultItem: Item = {
@@ -38,7 +39,7 @@ function genTable (csv: string) {
   return genTablePreview(header, rows);
 }
 
-export default function ViewItem({basePath}: Props): React.ReactElement<Props> | null {
+export default function ViewItem({basePath, accountId}: Props): React.ReactElement<Props> | null {
   const [item, setItem] = useState<Item>(defaultItem);
   const { value } = useParams();
 
@@ -53,6 +54,12 @@ export default function ViewItem({basePath}: Props): React.ReactElement<Props> |
   function handleBuy () {
     history.push(`${basePath}/new_order/${value}`);
   }
+
+  const [accepted, setAccepted] = useState<boolean>(false);
+
+  const imSeller = useMemo(() => {
+    return !!(accountId && isSamePerson(accountId, item.seller));
+  }, [accountId, item])
 
   return (
     <div>
@@ -71,7 +78,7 @@ export default function ViewItem({basePath}: Props): React.ReactElement<Props> |
           ['ID', (10000 + item.id).toString()],
           ['数据总数', '1万条'],
           ['价格', fmtAmount(item.details.price.PerRow.price) + ' 元/条'],
-          ['商户', '北京哈希森林科技有限公司'],
+          ['商户', pubkeyToCompany[item.seller]],
           ['数据大小', '2TB']
         ])}
       </Grid>
@@ -103,7 +110,7 @@ export default function ViewItem({basePath}: Props): React.ReactElement<Props> |
       <hr />
 
       <h2>链上记录</h2>
-      <Table celled padded>
+      <Table celled padded fixed>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell>操作时间</Table.HeaderCell>
@@ -120,11 +127,18 @@ export default function ViewItem({basePath}: Props): React.ReactElement<Props> |
           <Table.Row>
             <Table.Cell>2019-11-15 12:03</Table.Cell>
             <Table.Cell>//Bob</Table.Cell>
-            <Table.Cell>50000</Table.Cell>
-            <Table.Cell>50000</Table.Cell>
+            <Table.Cell>5</Table.Cell>
+            <Table.Cell>5</Table.Cell>
             <Table.Cell>模版-Join</Table.Cell>
             <Table.Cell>预置模版-建议通过</Table.Cell>
-            <Table.Cell><a href='#'>通过</a> <a href='$'>拒绝</a></Table.Cell>
+            <Table.Cell>
+              { imSeller && !accepted && (
+                <>
+                  <a onClick={()=>{setAccepted(true)}}>通过</a> | <a onClick={()=>{alert('refuse')}}>拒绝</a>
+                </>
+              )}
+              { accepted && '已通过' }
+            </Table.Cell>
           </Table.Row>
           <Table.Row>
             <Table.Cell>2019-11-13 14:10</Table.Cell>
@@ -140,7 +154,7 @@ export default function ViewItem({basePath}: Props): React.ReactElement<Props> |
 
       <Grid>
         <Grid.Row>
-          <Button floated='right' primary onClick={handleBuy}>购买</Button>
+          <Button floated='right' primary onClick={handleBuy} disabled={imSeller}>购买</Button>
         </Grid.Row>
       </Grid>
 
