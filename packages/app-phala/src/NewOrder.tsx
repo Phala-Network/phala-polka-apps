@@ -15,7 +15,10 @@ import { UploadContainer, genDataLabels, genTablePreview, fileToIpfsPath, readTe
 import { Item, defaultItem, CsvTablePreview, fmtAmount, Order } from './common/Models'
 import { getItem, set as setFile, getOrders } from './API';
 
+import AppContext from './AppContext';
+
 import imgIpfsSvg from './assets/ipfs-logo-vector-ice-text.svg';
+import { CrossChain } from './CrossChain';
 
 interface Props {
   basePath: string;
@@ -23,12 +26,13 @@ interface Props {
 }
 
 export default function NewOrder({basePath, accountId}: Props): React.ReactElement<Props> | null {
+  const app = React.useContext(AppContext.Context);
   const history = useHistory();
   useEffect(() => {
-    if (!accountId) {
+    if (!accountId || !app.state.near.accountId) {
       history.push(`${basePath}/account`);
     }
-  }, [accountId]);
+  }, [accountId, app.state]);
 
   // items
 
@@ -144,6 +148,34 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
       await sleep(500);
     }
     alert('创建交易超时');
+  }
+
+  const [nearTxPending, setNearTxPending] = React.useState<boolean>(false);
+
+  async function handleNearSubmit() {
+    if (!app.state.near.accountId) {
+      alert('请先连接NEAR Protocl');
+      return;
+    }
+    setNearTxPending(true);
+    const contract = app.state.near.contract!;
+    const eid: number = await contract.pushCommand({
+      contract: 1,
+      payload: JSON.stringify(pushCommandParams)
+    });
+    const MAX_RETRY = 10;
+    for (let i = 0; i < MAX_RETRY; i++) {
+      const events = await contract.getEvents({start: eid, length: 1});
+      if (events.length == 1 && events[0].state == 1) {
+        // succeed!
+        setNearTxPending(false);
+        handleSuccess();
+        break;
+      }
+      await sleep(1000);
+    }
+    // timeout
+    setNearTxPending(false);
   }
 
   return (
@@ -266,12 +298,17 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
 
       <Modal open={submitTxOpen} header='提交合约请求'>
         <Modal.Content>
-          <InputAddress
-            className='medium'
-            defaultValue={accountId}
-            isDisabled
-            label='账号'
-          />
+          <div>
+              <InputAddress
+                className='medium'
+                defaultValue={accountId}
+                isDisabled
+                label='账号'
+              />
+          </div>
+          <div className="cross-chain-centered-container">
+            <CrossChain loading={nearTxPending} />
+          </div>
         </Modal.Content>
         <Modal.Actions>
           <PButton.Group>
@@ -282,14 +319,17 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
               onClick={onClose}
             />
             <PButton.Or />
-            <TxButton
+            {/* <TxButton
               accountId={accountId}
               icon='send'
               label='提交'
               params={[1, JSON.stringify(pushCommandParams)]}
               tx='execution.pushCommand'
               onSuccess={handleSuccess}
-            />
+            /> */}
+            <Button onClick={handleNearSubmit} loading={nearTxPending}>
+              跨链提交
+            </Button>
           </PButton.Group>
         </Modal.Actions>
       </Modal>

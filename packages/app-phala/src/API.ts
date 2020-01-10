@@ -4,7 +4,7 @@ import { Base64 } from 'js-base64';
 import { Item, Order } from './common/Models'
 
 const pruntime = axios.create({
-  baseURL: 'http://172.20.20.211:8001/',
+  baseURL: '/tee-api/',
   timeout: 5000,
 });
 

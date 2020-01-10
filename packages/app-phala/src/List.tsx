@@ -16,6 +16,8 @@ import useForm, { FormContext, useFormContext } from 'react-hook-form';
 import { UploadContainer, genTablePreview, fileToIpfsPath, readTextFileAsync, isSamePerson, sleep } from './common/Utils';
 import { Item, amountFromNL } from './common/Models'
 import { set as setFile, getItems } from './API';
+import AppContext from './AppContext';
+import { CrossChain } from './CrossChain';
 
 import imgIpfsSvg from './assets/ipfs-logo-vector-ice-text.svg';
 
@@ -261,11 +263,12 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
     })
   }
 
+  const app = React.useContext(AppContext.Context);
   useEffect(() => {
-    if (!accountId) {
+    if (!accountId || !app.state.near.accountId) {
       history.push(`${basePath}/account`);
     }
-  }, [accountId]);
+  }, [accountId, app.state]);
 
   // submission
 
@@ -318,6 +321,34 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
     alert('创建商品超时');
   }
 
+  const [nearTxPending, setNearTxPending] = React.useState<boolean>(false);
+
+  async function handleNearSubmit() {
+    if (!app.state.near.accountId) {
+      alert('请先连接NEAR Protocl');
+      return;
+    }
+    setNearTxPending(true);
+    const contract = app.state.near.contract!;
+    const eid: number = await contract.pushCommand({
+      contract: 1,
+      payload: JSON.stringify(pushCommand)
+    });
+    const MAX_RETRY = 10;
+    for (let i = 0; i < MAX_RETRY; i++) {
+      const events = await contract.getEvents({start: eid, length: 1});
+      if (events.length == 1 && events[0].state == 1) {
+        // succeed!
+        setNearTxPending(false);
+        handleSuccess();
+        break;
+      }
+      await sleep(1000);
+    }
+    // timeout
+    setNearTxPending(false);
+  }
+
   return (
     <div>
       <h1>新建商品</h1>
@@ -331,12 +362,17 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
 
       <Modal open={submitTxOpen} header='提交合约请求'>
         <Modal.Content>
-          <InputAddress
-            className='medium'
-            defaultValue={accountId}
-            isDisabled
-            label='账号'
-          />
+          <div>
+            <InputAddress
+              className='medium'
+              defaultValue={accountId}
+              isDisabled
+              label='账号'
+            />
+          </div>
+          <div className="cross-chain-centered-container">
+            <CrossChain loading={nearTxPending} />
+          </div>
         </Modal.Content>
         <Modal.Actions>
           <PButton.Group>
@@ -347,14 +383,17 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
               onClick={onClose}
             />
             <PButton.Or />
-            <TxButton
+            {/* <TxButton
               accountId={accountId}
               icon='send'
               label='提交'
               params={[1, JSON.stringify(pushCommand)]}
               tx='execution.pushCommand'
               onSuccess={handleSuccess}
-            />
+            /> */}
+            <Button onClick={handleNearSubmit} loading={nearTxPending}>
+              跨链提交
+            </Button>
           </PButton.Group>
         </Modal.Actions>
       </Modal>

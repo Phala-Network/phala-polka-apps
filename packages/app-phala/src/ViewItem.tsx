@@ -154,7 +154,7 @@ export default function ViewItem({basePath, accountId}: Props): React.ReactEleme
 
       <Grid>
         <Grid.Row>
-          <Button floated='right' primary onClick={handleBuy} disabled={imSeller}>购买</Button>
+          <Button floated='right' primary onClick={handleBuy}>购买</Button>
         </Grid.Row>
       </Grid>
 

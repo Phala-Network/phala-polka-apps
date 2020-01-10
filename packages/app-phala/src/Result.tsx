@@ -60,7 +60,7 @@ function createSteps(type: string, complete = false): Array<StepDef> {
       new StepDef('提交上链', [step(1), null, step(CHAIN_TIME)], complete),
       new StepDef('上传查询', [step(5), step(10), null], complete),
       new StepDef('准备数据集', [null, step(5), null], complete),
-      new StepDef('等待卖家审核', [null, null, step(200)], complete),
+      new StepDef('等待卖家审核', [null, null, step(30)], complete),
       new StepDef('执行计算', [null, step(10), null], complete),
       new StepDef('加密结果', [null, step(5), null], complete),
     ];
@@ -246,14 +246,15 @@ export default function Result(props: Props): React.ReactElement<Props> | null {
                 isDisabled
               />
               <PButton.Group>
-                <TxButton
+                {/* <TxButton
                   accountId={props.accountId}
                   icon='send'
                   label='支付'
                   params={[payee, amount]}
                   tx='balances.transfer'
                   onSuccess={() => {setPaid()}}
-                />
+                /> */}
+                <Button primary onClick={() => {setPaid()}} icon="paper plane">支付</Button>
               </PButton.Group>
             </div>
           ) : (
