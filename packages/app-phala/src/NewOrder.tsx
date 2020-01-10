@@ -154,7 +154,7 @@ export default function NewOrder({basePath, accountId}: Props): React.ReactEleme
 
   async function handleNearSubmit() {
     if (!app.state.near.accountId) {
-      alert('请先连接NEAR Protocl');
+      alert('请先连接NEAR Protocol');
       return;
     }
     setNearTxPending(true);

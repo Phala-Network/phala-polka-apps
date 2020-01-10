@@ -325,7 +325,7 @@ export default function List({basePath, accountId}: Props): React.ReactElement<P
 
   async function handleNearSubmit() {
     if (!app.state.near.accountId) {
-      alert('请先连接NEAR Protocl');
+      alert('请先连接NEAR Protocol');
       return;
     }
     setNearTxPending(true);
