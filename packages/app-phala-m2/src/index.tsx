@@ -32,6 +32,7 @@ function TemplateApp ({ className }: Props): React.ReactElement<Props> {
   const [info, setInfo] = useState<GetInfoResp | null>(null);
 
   React.useEffect(() => {
+    let stop = false;
     const API = new PRuntime();
     setEndpoint(API.endpoint);
     const update = async () => {
@@ -42,9 +43,12 @@ function TemplateApp ({ className }: Props): React.ReactElement<Props> {
         });
         setLatency(l => l ? l * 0.8 + dt * 0.2 : dt);
       } catch (err) { console.log(err) }
-      setTimeout(update, 1000);
+      if (!stop) {
+        setTimeout(update, 1000);
+      }
     };
     update();
+    return () => { stop = true; console.log('stop'); }
   }, [])
 
   return (
@@ -57,6 +61,10 @@ function TemplateApp ({ className }: Props): React.ReactElement<Props> {
         pRuntimeBlock={info?.blocknum}
         pRuntimeECDHKey={info?.ecdhPublicKey}
       />
+      <section>
+        <h1>ECDH test</h1>
+
+      </section>
       <AccountSelector onChange={setAccountId} />
       <Transfer accountId={accountId} />
     </main>
