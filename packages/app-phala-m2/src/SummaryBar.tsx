@@ -14,7 +14,14 @@ import { formatBalance, formatNumber } from '@polkadot/util';
 
 import translate from './translate';
 
-interface Props extends BareProps, I18nProps {}
+interface Props extends BareProps, I18nProps {
+  pRuntimeEndpoint?: string,
+  pRuntimeConnected?: boolean,
+  pRuntimeLatency?: number,
+  pRuntimeInitalized?: boolean,
+  pRuntimeBlock?: number,
+  pRuntimeECDHKey?: string,
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SummaryBar (props: Props): React.ReactElement<Props> {
@@ -25,32 +32,57 @@ function SummaryBar (props: Props): React.ReactElement<Props> {
   const validators = useCall<DeriveStakingValidators>(api.derive.staking.validators, []);
 
   return (
-    <summary>
-      <div>
-        <Bubble icon='tty' label='node'>
-          {systemName} v{systemVersion}
-        </Bubble>
-        <Bubble icon='chain' label='chain'>
-          {systemChain}
-        </Bubble>
-        <Bubble icon='code' label='runtime'>
-          {api.runtimeVersion.implName} v{api.runtimeVersion.implVersion.toString(10)}
-        </Bubble>
-        <Bubble icon='bullseye' label='best #'>
-          {formatNumber(bestNumber)} ({formatNumber(bestNumberLag)} lag)
-        </Bubble>
-        {validators && (
-          <Bubble icon='chess queen' label='validators'>{
-            validators.validators.map((accountId, index): React.ReactNode => (
-              <IdentityIcon key={index} value={accountId} size={20} />
-            ))
-          }</Bubble>
-        )}
-        <Bubble icon='circle' label='total tokens'>
-          {formatBalance(totalInsurance)}
-        </Bubble>
-      </div>
-    </summary>
+    <section>
+      <h1>summary</h1>
+      <summary>
+        <div>
+          <Bubble icon='tty' label='node'>
+            {systemName} v{systemVersion}
+          </Bubble>
+          <Bubble icon='chain' label='chain'>
+            {systemChain}
+          </Bubble>
+          <Bubble icon='code' label='runtime'>
+            {api.runtimeVersion.implName} v{api.runtimeVersion.implVersion.toString(10)}
+          </Bubble>
+          <Bubble icon='bullseye' label='best #'>
+            {formatNumber(bestNumber)} ({formatNumber(bestNumberLag)} lag)
+          </Bubble>
+          {validators && (
+            <Bubble icon='chess queen' label='validators'>{
+              validators.validators.map((accountId, index): React.ReactNode => (
+                <IdentityIcon key={index} value={accountId} size={20} />
+              ))
+            }</Bubble>
+          )}
+          <Bubble icon='circle' label='total tokens'>
+            {formatBalance(totalInsurance)}
+          </Bubble>
+        </div>
+        <hr/>
+        <div>
+          <Bubble icon='tty' label='pRuntime'>
+            {props.pRuntimeEndpoint}
+          </Bubble>
+          <Bubble icon='signal' label='connected'>
+            {props.pRuntimeConnected ? `(${Math.round(props.pRuntimeLatency!)}ms)` : 'no'}
+          </Bubble>
+          {props.pRuntimeConnected && (
+            <>
+              <Bubble icon='check circle' label='initlized'>
+                {props.pRuntimeInitalized ? 'yes' : 'no'}
+              </Bubble>
+              <Bubble icon='bullseye' label='synced'>
+                {props.pRuntimeBlock}
+              </Bubble>
+              <Bubble icon='key' label='ECDH key'>
+                {props.pRuntimeECDHKey?.substring(0, 8) + '...'}
+              </Bubble>
+            </>
+          )}
+        </div>
+      </summary>
+    </section>
   );
 }
 
