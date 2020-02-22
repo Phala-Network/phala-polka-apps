@@ -18,24 +18,30 @@ function AccountSelector ({ className, onChange }: Props): React.ReactElement<Pr
   useEffect((): void => onChange(accountId), [accountId]);
 
   return (
-    <section className={`template--AccountSelector ui--row ${className}`}>
-      <InputAddress
-        className='medium'
-        label='my default account'
-        onChange={setAccountId}
-        type='account'
-      />
-      <div className='medium'>
-        <Bubble color='teal' icon='address card' label='index'>
-          <AccountIndex value={accountId} />
-        </Bubble>
-        <Bubble color='yellow' icon='adjust' label='balance'>
-          <Balance params={accountId} />
-        </Bubble>
-        <Bubble color='yellow' icon='target' label='transactions'>
-          <Nonce params={accountId} />
-        </Bubble>
+    <section className={`template--AccountSelector ${className}`}>
+      <h1>select account</h1>
+      <div className='ui--row'>
+        <div className='large'>
+          <InputAddress
+            label='my default account'
+            onChange={setAccountId}
+            type='account'
+          />
+        </div>
       </div>
+      <div className='ui--row align-right'>
+        <div className='large'>
+            <Bubble color='teal' icon='address card' label='index'>
+              <AccountIndex value={accountId} />
+            </Bubble>
+            <Bubble color='yellow' icon='adjust' label='balance'>
+              <Balance params={accountId} />
+            </Bubble>
+            <Bubble color='yellow' icon='target' label='transactions'>
+              <Nonce params={accountId} />
+            </Bubble>
+          </div>
+        </div>
     </section>
   );
 }
@@ -45,5 +51,9 @@ export default styled(AccountSelector)`
 
   .summary {
     text-align: center;
+  }
+
+  .align-right {
+    text-align: right;
   }
 `;
