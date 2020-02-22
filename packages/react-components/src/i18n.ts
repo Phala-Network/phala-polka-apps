@@ -52,6 +52,7 @@ i18n
       'app-generic-asset',
       'app-js',
       'app-parachains',
+      'app-phala-m2',
       'app-settings',
       'app-staking',
       'app-storage',

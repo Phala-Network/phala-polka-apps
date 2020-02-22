@@ -18,6 +18,7 @@ import explorer from './explorer';
 import extrinsics from './extrinsics';
 import genericAsset from './generic-asset';
 import js from './js';
+import phalaM2 from './phala-m2';
 import parachains from './parachains';
 import settings from './settings';
 import staking from './staking';
@@ -37,6 +38,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     claims,
     transfer,
     genericAsset,
+    phalaM2,
     null,
     staking,
     democracy,
@@ -53,6 +55,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     claims,
     transfer,
     genericAsset,
+    phalaM2,
     null,
     staking,
     democracy,

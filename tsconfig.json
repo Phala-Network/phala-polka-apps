@@ -33,6 +33,8 @@
       "@polkadot/app-js/*": [ "packages/app-js/src/*" ],
       "@polkadot/app-parachains": [ "packages/app-parachains/src" ],
       "@polkadot/app-parachains/*": [ "packages/app-parachains/src/*" ],
+      "@polkadot/app-phala-m2": [ "packages/app-phala-m2/src" ],
+      "@polkadot/app-phala-m2/*": [ "packages/app-phala-m2/src/*" ],
       "@polkadot/app-settings": [ "packages/app-settings/src" ],
       "@polkadot/app-settings/*": [ "packages/app-settings/src/*" ],
       "@polkadot/app-staking": [ "packages/app-staking/src" ],
