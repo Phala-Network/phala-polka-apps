@@ -7,10 +7,14 @@
 // `t` is inject into props (see the HOC export) and `t('any text')
 // does the translation
 import { AppProps, I18nProps } from '@polkadot/react-components/types';
+import { Input } from '@polkadot/react-components';
+import { stringToU8a } from '@polkadot/util';
 
 // external imports (including those found in the packages/*
 // of this repo)
 import React, { useState } from 'react';
+import styled from 'styled-components';
+import * as base64 from 'base64-js';
 
 // local imports and components
 import AccountSelector from './AccountSelector';
@@ -20,12 +24,15 @@ import translate from './translate';
 
 import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
+import * as ECDH from './pruntime/ecdh';
 
 // define our internal types
 interface Props extends AppProps, I18nProps {}
 
-function TemplateApp ({ className }: Props): React.ReactElement<Props> {
+function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   const [accountId, setAccountId] = useState<string | null>(null);
+
+  // get_info loop
 
   const [endpoint, setEndpoint] = useState<string>('');
   const [latency, setLatency] = useState<number | null>(null);
@@ -51,6 +58,67 @@ function TemplateApp ({ className }: Props): React.ReactElement<Props> {
     return () => { stop = true; console.log('stop'); }
   }, [])
 
+  // ecdh sign
+
+  const [message, setMessage] = useState('');
+  const [ecdhPair, setEcdhPair] = useState<CryptoKeyPair | null>(null);
+  const [runtimePubkeyHex, setRuntimePubkeyHex] = useState('');
+  const [aesKey, setAesKey] = useState<CryptoKey | null>(null);
+  const [ecdhPubKeyString, setEcdhPubKeyString] = useState('');
+  const [ecdhPrivKeyString, setEcdhPrivKeyString] = useState('');
+  const [aesKeyString, setAesKeyString] = useState('');
+
+  async function genEcdhPair() {
+    const pair = await ECDH.generateKeyPair();
+    setEcdhPair(pair);
+    setEcdhPubKeyString(await ECDH.dumpKeyString(pair.publicKey));
+    setEcdhPrivKeyString(await ECDH.dumpKeyString(pair.privateKey));
+  }
+  React.useEffect(() => {genEcdhPair()}, []);
+  React.useEffect(() => {
+    if (info && runtimePubkeyHex != info.ecdhPublicKey) {
+      setRuntimePubkeyHex(info.ecdhPublicKey);
+    }
+  }, [info]);
+  async function handleECDHKeys() {
+    if (runtimePubkeyHex && ecdhPair) {
+      const aesKey = await ECDH.deriveSecretKey(ecdhPair.privateKey, runtimePubkeyHex);
+      setAesKey(aesKey);
+      setAesKeyString(await ECDH.dumpKeyString(aesKey));
+
+      // send test request
+      const API = new PRuntime();
+      console.log(`Sending test with pk: ${ecdhPubKeyString}`);
+      await API.test({test_ecdh: { pubkey_hex: ecdhPubKeyString }});
+    }
+  }
+  React.useEffect(() => {handleECDHKeys()}, [runtimePubkeyHex, ecdhPair])
+
+  async function testSign() {
+    const API = new PRuntime();
+    // message
+    const data = stringToU8a(message);
+    const msgB64 = base64.fromByteArray(data);
+    await API.test({
+      test_ecdh: { 
+        pubkey_hex: ecdhPubKeyString,
+        message_b64: msgB64,
+      }
+    })
+    console.log('Sent test: ', ecdhPubKeyString, msgB64);
+  }
+
+  function shortKey(key: string = '', len: number = 32): string {
+    if (key.startsWith('0x')) {
+      key = key.substring(2);
+    }
+    if (!key) {
+      return ''
+    }
+    return key.substring(0, len) + '...';
+  }
+
+
   return (
     <main className={className}>
       <SummaryBar
@@ -63,7 +131,32 @@ function TemplateApp ({ className }: Props): React.ReactElement<Props> {
       />
       <section>
         <h1>ECDH test</h1>
-
+        <div className='ui--row'>
+          <div className='large'>
+            <div>
+              <Input
+                className='full'
+                // help={t('any message')}
+                // isError={!isNameValid}
+                label={t('message')}
+                onChange={setMessage}
+                onEnter={testSign}
+                placeholder={t('any text')}
+                value={message}
+              />
+            </div>
+            <div>
+              <table>
+                <tbody>
+                  <tr><td>ECDH Public</td><td>{shortKey(ecdhPubKeyString)}</td></tr>
+                  <tr><td>ECDH Private</td><td>{shortKey(ecdhPrivKeyString)}</td></tr>
+                  <tr><td>pRuntime Public</td><td>{shortKey(info?.ecdhPublicKey)}</td></tr>
+                  <tr><td>Derived Secret</td> <td>{shortKey(aesKeyString)}</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </section>
       <AccountSelector onChange={setAccountId} />
       <Transfer accountId={accountId} />
@@ -71,4 +164,11 @@ function TemplateApp ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default translate(TemplateApp);
+export default styled(translate(TemplateApp))`
+  table td:nth-child(1) {
+    text-align: right;
+  }
+  table td:nth-child(2) {
+    font-family: monospace;
+  }
+`;

@@ -1,6 +1,6 @@
 import axios, {AxiosInstance} from 'axios';
 
-import { GetInfoResp, loadModel } from './models';
+import * as Models from './models';
 
 // Generates a radom nonce object used in pRuntime requests
 function nonce(): object {
@@ -45,12 +45,17 @@ class PRuntime {
   // Sends the request and returns the decoded response
   async reqTyped<T>(path: string, param: object = {}): Promise<T> {
     const resp = await this.req(path, param);
-    return loadModel<T>(resp);
+    return Models.loadModel<T>(resp);
   }
 
   // API get_info
-  async getInfo(): Promise<GetInfoResp> {
-    return await this.reqTyped<GetInfoResp>('get_info');
+  async getInfo(): Promise<Models.GetInfoResp> {
+    return await this.reqTyped<Models.GetInfoResp>('get_info');
+  }
+
+  // API test
+  async test(params: Models.TestReq): Promise<Models.TestResp> {
+    return await this.reqTyped<Models.TestResp>('test', params);
   }
 }
 
