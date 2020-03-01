@@ -89,7 +89,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       // send test request
       const API = new PRuntime();
       console.log(`Sending test with pk: ${ecdhPubKeyString}`);
-      await API.test({test_ecdh: { pubkey_hex: ecdhPubKeyString }});
+      await API.test({testEcdh: { pubkeyHex: ecdhPubKeyString }});
     }
   }
   React.useEffect(() => {handleECDHKeys()}, [runtimePubkeyHex, ecdhPair])
@@ -100,9 +100,9 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     const data = stringToU8a(message);
     const msgB64 = base64.fromByteArray(data);
     await API.test({
-      test_ecdh: { 
-        pubkey_hex: ecdhPubKeyString,
-        message_b64: msgB64,
+      testEcdh: { 
+        pubkeyHex: ecdhPubKeyString,
+        messageB64: msgB64,
       }
     })
     console.log('Sent test: ', ecdhPubKeyString, msgB64);
