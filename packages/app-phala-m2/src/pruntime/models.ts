@@ -1,4 +1,5 @@
 import camelcaseKeys from 'camelcase-keys';
+import snakecaseKeys from 'snakecase-keys';
 
 export interface GetInfoResp {
   initialized: boolean;
@@ -8,17 +9,23 @@ export interface GetInfoResp {
 }
 
 export interface TestReq {
-  test_block_parse?: boolean;
-  test_bridge?: boolean;
-  test_ecdh?: TestEcdhParam;
+  testBlockParse?: boolean;
+  testBridge?: boolean;
+  testEcdh?: TestEcdhParam;
 }
 export interface TestEcdhParam {
-  pubkey_hex?: string;
-  message_b64?: string;
+  pubkeyHex?: string;
+  messageB64?: string;
 }
 export interface TestResp {}
 
+const kRegexpEnumName = /^[A-Z][A-Za-z0-9]*$/;
+
 // Loads the model and covnerts the snake case keys to camel case.
-export function loadModel<T>(obj: {[key: string]: any}): T {
-  return camelcaseKeys(obj) as unknown as T;
+export function fromApi<T>(obj: {[key: string]: any}): T {
+  return camelcaseKeys(obj, {deep: true, exclude: [kRegexpEnumName]}) as unknown as T;
+}
+
+export function toApi<T>(obj: T): any {
+  return snakecaseKeys(obj, {deep: true, exclude: [kRegexpEnumName]});
 }

@@ -44,8 +44,9 @@ class PRuntime {
 
   // Sends the request and returns the decoded response
   async reqTyped<T>(path: string, param: object = {}): Promise<T> {
-    const resp = await this.req(path, param);
-    return Models.loadModel<T>(resp);
+    const apiParam = Models.toApi(param);
+    const resp = await this.req(path, apiParam);
+    return Models.fromApi<T>(resp);
   }
 
   // API get_info
