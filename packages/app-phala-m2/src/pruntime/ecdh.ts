@@ -29,16 +29,19 @@ export async function deriveSecretKey(privkey: CryptoKey, hexPubkey: string): Pr
   return shared;
 }
 
-export async function dumpKeyString(key: CryptoKey): Promise<string> {
-  let data: ArrayBuffer;
+export async function dumpKeyData(key: CryptoKey): Promise<ArrayBuffer> {
   if (key.type == 'public' || key.type == 'secret') {
-    data = await crypto.subtle.exportKey('raw', key);
+    return await crypto.subtle.exportKey('raw', key);
   } else if (key.type == 'private') {
     // dump pkcs8
-    data = await crypto.subtle.exportKey('pkcs8', key);
+    return await crypto.subtle.exportKey('pkcs8', key);
   } else {
     throw new Error('Unsupported key type');
   }
+}
+
+export async function dumpKeyString(key: CryptoKey): Promise<string> {
+  let data = await dumpKeyData(key);
   const hexWith0x = u8aToHex(new Uint8Array(data));
   return hexWith0x.substring(2);
 }

@@ -1,5 +1,10 @@
-import axios, {AxiosInstance} from 'axios';
+import { stringToU8a } from '@polkadot/util';
 
+import axios, {AxiosInstance} from 'axios';
+import * as base64 from 'base64-js';
+
+import * as Ecdh from './ecdh';
+import * as Aead from './aead';
 import * as Models from './models';
 
 // Generates a radom nonce object used in pRuntime requests
@@ -58,6 +63,28 @@ class PRuntime {
   async test(params: Models.TestReq): Promise<Models.TestResp> {
     return await this.reqTyped<Models.TestResp>('test', params);
   }
+}
+
+// Encrypt `data` by AEAD-AES-GCM with the secret key derived by ECDH
+export async function encrypt(sk: CryptoKey, pk: CryptoKey, remotePkHex: string, data: ArrayBuffer)
+: Promise<Models.AeadCipher> {
+  const key = await Ecdh.deriveSecretKey(sk, remotePkHex);
+  const iv = Aead.generateIv();
+  const cipher = await Aead.encrypt(iv, key, data);
+  const pkData = await Ecdh.dumpKeyData(pk);
+  return {
+    ivB64: base64.fromByteArray(iv),
+    cipherB64: base64.fromByteArray(new Uint8Array(cipher)),
+    pubkeyB64: base64.fromByteArray(new Uint8Array(pkData)),
+  }
+}
+
+// Serialize and encrypt `obj` by AEAD-AES-GCM with the secret key derived by ECDH
+export async function encryptObj(sk: CryptoKey, pk: CryptoKey, remotePkHex: string, obj: any)
+: Promise<Models.AeadCipher> {
+  const objJson = JSON.stringify(obj);
+  const data = stringToU8a(objJson);
+  return await encrypt(sk, pk, remotePkHex, data);
 }
 
 type AsyncFunction = () => Promise<void>;

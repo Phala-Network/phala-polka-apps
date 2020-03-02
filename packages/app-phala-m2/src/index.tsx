@@ -159,7 +159,12 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
         </div>
       </section>
       <AccountSelector onChange={setAccountId} />
-      <Transfer accountId={accountId} />
+      <Transfer
+        accountId={accountId}
+        ecdhPrivkey={ecdhPair?.privateKey}
+        ecdhPubkey={ecdhPair?.publicKey}
+        remoteEcdhPubkeyHex={info?.ecdhPublicKey}
+      />
     </main>
   );
 }

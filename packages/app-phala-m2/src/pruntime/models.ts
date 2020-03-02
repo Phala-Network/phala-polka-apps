@@ -19,6 +19,17 @@ export interface TestEcdhParam {
 }
 export interface TestResp {}
 
+export interface Payload {
+  Plain?: string;
+  Cipher?: AeadCipher;
+}
+
+export interface AeadCipher {
+  ivB64: String;
+  cipherB64: String;
+  pubkeyB64: String;
+}
+
 const kRegexpEnumName = /^[A-Z][A-Za-z0-9]*$/;
 
 // Loads the model and covnerts the snake case keys to camel case.
