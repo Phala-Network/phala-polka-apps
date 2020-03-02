@@ -6,15 +6,43 @@ import BN from 'bn.js';
 import React, { useState } from 'react';
 import { Button, InputAddress, InputBalance, TxButton } from '@polkadot/react-components';
 
+import {encryptObj} from './pruntime';
 import Summary from './Summary';
+import {toApi} from './pruntime/models'
 
 interface Props {
   accountId?: string | null;
+  ecdhPrivkey: CryptoKey | undefined,
+  ecdhPubkey: CryptoKey | undefined,
+  remoteEcdhPubkeyHex: string | undefined,
 }
 
-export default function Transfer ({ accountId }: Props): React.ReactElement<Props> {
+const kContractId = 2;
+
+export default function Transfer ({ accountId, ecdhPrivkey, ecdhPubkey, remoteEcdhPubkeyHex }: Props): React.ReactElement<Props> {
   const [amount, setAmount] = useState<BN | undefined | null>(null);
   const [recipientId, setRecipientId] = useState<string | null>(null);
+  const [command, setCommand] = useState('');
+
+  React.useEffect(() => {
+    if (!ecdhPrivkey || !ecdhPubkey || !remoteEcdhPubkeyHex || !recipientId || !amount) {
+      return;
+    }
+    console.log('recv', recipientId);
+    (async () => {
+      const obj = {
+        Command: {
+          transfer: {
+            to: recipientId,  // TODO: ss58 to account id?
+            amount: amount.toString()
+          }
+        }
+      };
+      const cipher = await encryptObj(ecdhPrivkey, ecdhPubkey, remoteEcdhPubkeyHex, obj);
+      const apiCipher = toApi(cipher);
+      setCommand(JSON.stringify({Cipher: apiCipher}));
+    })()
+  }, [ecdhPrivkey, ecdhPubkey, remoteEcdhPubkeyHex, recipientId, amount])
 
   return (
     <section>
@@ -35,8 +63,8 @@ export default function Transfer ({ accountId }: Props): React.ReactElement<Prop
               accountId={accountId}
               icon='send'
               label='make transfer'
-              params={[recipientId, amount]}
-              tx='balances.transfer'
+              params={[kContractId, command]}
+              tx='execution.pushCommand'
             />
           </Button.Group>
         </div>
