@@ -7,6 +7,7 @@ import * as base64 from 'base64-js';
 import * as Ecdh from './ecdh';
 import * as Aead from './aead';
 import * as Models from './models';
+import config from '../config';
 
 // Generates a radom nonce object used in pRuntime requests
 function nonce(): object {
@@ -25,7 +26,7 @@ class PRuntime {
   endpoint: string;
   service: AxiosInstance;
 
-  constructor(endpoint: string = 'https://hashbox.corp.phala.network/tee-api/') {
+  constructor(endpoint: string = config.pRuntimeEndpoint) {
     this.endpoint = endpoint;
     this.service = axios.create({
       baseURL: endpoint
