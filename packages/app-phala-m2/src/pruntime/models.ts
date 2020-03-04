@@ -30,6 +30,23 @@ export interface AeadCipher {
   pubkeyB64: String;
 }
 
+export interface SignedQuery {
+  query: string;
+  origin?: Origin;
+}
+
+export interface Origin {
+  origin: string;
+  sig_b64: string;
+  sig_type: 'ed25519' | 'sr25519' | 'ecdsa';
+}
+
+export interface Query<T> {
+  contract_id: number;
+  nonce: number;
+  request: T;
+}
+
 const kRegexpEnumName = /^[A-Z][A-Za-z0-9]*$/;
 
 // Loads the model and covnerts the snake case keys to camel case.

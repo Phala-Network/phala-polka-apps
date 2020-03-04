@@ -9,6 +9,9 @@
 import { AppProps, I18nProps } from '@polkadot/react-components/types';
 import { Input } from '@polkadot/react-components';
 import { stringToU8a } from '@polkadot/util';
+import { KeyringPair } from '@polkadot/keyring/types';
+import keyring from '@polkadot/ui-keyring';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 // external imports (including those found in the packages/*
 // of this repo)
@@ -22,7 +25,7 @@ import SummaryBar from './SummaryBar';
 import Transfer from './Transfer';
 import translate from './translate';
 
-import PRuntime, {measure} from './pruntime';
+import PRuntime, {measure, signQuery} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
 import * as ECDH from './pruntime/ecdh';
 
@@ -31,6 +34,16 @@ interface Props extends AppProps, I18nProps {}
 
 function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [keypair, setKeypair] = useState<KeyringPair | null>(null);
+  React.useEffect(() => {
+    (async () => {
+      await cryptoWaitReady();
+      if (accountId) {
+        const pair = keyring.getPair(accountId || '');
+        setKeypair(pair);
+      }
+    })();
+  }, [accountId]);
 
   // get_info loop
 
@@ -49,7 +62,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
           setInfo(info);
         });
         setLatency(l => l ? l * 0.8 + dt * 0.2 : dt);
-      } catch (err) { console.log(err) }
+      } catch (err) { console.debug(err) }
       if (!stop) {
         setTimeout(update, 1000);
       }
@@ -108,6 +121,21 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     console.log('Sent test: ', ecdhPubKeyString, msgB64);
   }
 
+  // query
+
+  function testQuery() {
+    const pair = keypair;
+    console.log('Keypair:', pair);
+    if (!pair) {
+      return;
+    }
+    new PRuntime().query(2, {
+      FreeBalance: "0011223344001122334400112233440011223344"
+    }, pair);
+  }
+
+  // utilities
+
   function shortKey(key: string = '', len: number = 32): string {
     if (key.startsWith('0x')) {
       key = key.substring(2);
@@ -151,7 +179,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
                   <tr><td>ECDH Public</td><td>{shortKey(ecdhPubKeyString)}</td></tr>
                   <tr><td>ECDH Private</td><td>{shortKey(ecdhPrivKeyString)}</td></tr>
                   <tr><td>pRuntime Public</td><td>{shortKey(info?.ecdhPublicKey)}</td></tr>
-                  <tr><td>Derived Secret</td> <td>{shortKey(aesKeyString)}</td></tr>
+                  <tr><td>Derived Secret</td><td>{shortKey(aesKeyString)}</td></tr>
                 </tbody>
               </table>
             </div>
@@ -159,6 +187,10 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
         </div>
       </section>
       <AccountSelector onChange={setAccountId} />
+      <section>
+        accid: {accountId}
+        <button onClick={testQuery}>send!</button>
+      </section>
       <Transfer
         accountId={accountId}
         ecdhPrivkey={ecdhPair?.privateKey}
