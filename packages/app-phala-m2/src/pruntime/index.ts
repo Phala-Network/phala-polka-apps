@@ -1,4 +1,5 @@
-import { stringToU8a } from '@polkadot/util';
+import { stringToU8a, u8aToHex } from '@polkadot/util';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 import axios, {AxiosInstance} from 'axios';
 import * as base64 from 'base64-js';
@@ -63,6 +64,16 @@ class PRuntime {
   async test(params: Models.TestReq): Promise<Models.TestResp> {
     return await this.reqTyped<Models.TestResp>('test', params);
   }
+
+  // API query
+  async query<T>(contractId: number, request: T, keypair?: KeyringPair) {
+    const q = signQuery({
+      contractId: contractId,
+      request: request,
+      nonce: Math.random()*65535 | 0,
+    }, keypair);
+    return await this.reqTyped<Models.TestResp>('query', q);
+  }
 }
 
 // Encrypt `data` by AEAD-AES-GCM with the secret key derived by ECDH
@@ -85,6 +96,22 @@ export async function encryptObj(sk: CryptoKey, pk: CryptoKey, remotePkHex: stri
   const objJson = JSON.stringify(obj);
   const data = stringToU8a(objJson);
   return await encrypt(sk, pk, remotePkHex, data);
+}
+
+export function signQuery<T>(query: Models.Query<T>, keypair?: KeyringPair) {
+  const apiQuery = Models.toApi(query);
+  const queryJson = JSON.stringify(apiQuery);
+  const data = stringToU8a(queryJson);
+  const signedQuery: Models.SignedQuery = { query: queryJson };
+  if (keypair) {
+    const sig = keypair.sign(data);
+    signedQuery.origin = {
+      origin:  u8aToHex(keypair.publicKey).substring(2),
+      sigB64: base64.fromByteArray(sig),
+      sigType: keypair.type
+    };
+  }
+  return signedQuery;
 }
 
 type AsyncFunction = () => Promise<void>;
