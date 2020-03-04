@@ -1,4 +1,5 @@
-import { stringToU8a } from '@polkadot/util';
+import { stringToU8a, u8aToHex } from '@polkadot/util';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 import axios, {AxiosInstance} from 'axios';
 import * as base64 from 'base64-js';
@@ -85,6 +86,21 @@ export async function encryptObj(sk: CryptoKey, pk: CryptoKey, remotePkHex: stri
   const objJson = JSON.stringify(obj);
   const data = stringToU8a(objJson);
   return await encrypt(sk, pk, remotePkHex, data);
+}
+
+export function signQuery<T>(query: Models.Query<T>, keypair?: KeyringPair) {
+  const queryJson = JSON.stringify(query);
+  const data = stringToU8a(queryJson);
+  const signedQuery: Models.SignedQuery = { query: queryJson };
+  if (keypair) {
+    const sig = keypair.sign(data);
+    signedQuery.origin = {
+      origin:  u8aToHex(keypair.publicKey).substring(2),
+      sig_b64: base64.fromByteArray(sig),
+      sig_type: keypair.type
+    };
+  }
+  return signedQuery;
 }
 
 type AsyncFunction = () => Promise<void>;

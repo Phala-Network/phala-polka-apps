@@ -9,6 +9,8 @@
 import { AppProps, I18nProps } from '@polkadot/react-components/types';
 import { Input } from '@polkadot/react-components';
 import { stringToU8a } from '@polkadot/util';
+import { KeyringPair } from '@polkadot/keyring/types';
+import keyring from '@polkadot/ui-keyring';
 
 // external imports (including those found in the packages/*
 // of this repo)
@@ -22,7 +24,7 @@ import SummaryBar from './SummaryBar';
 import Transfer from './Transfer';
 import translate from './translate';
 
-import PRuntime, {measure} from './pruntime';
+import PRuntime, {measure, signQuery} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
 import * as ECDH from './pruntime/ecdh';
 
@@ -31,6 +33,16 @@ interface Props extends AppProps, I18nProps {}
 
 function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   const [accountId, setAccountId] = useState<string | null>(null);
+  const [keypair, setKeypair] = useState<KeyringPair | null>(null);
+  function handleChangeAccount(accountId: string | null) {
+    setAccountId(accountId);
+    if (accountId) {
+      setKeypair(keyring.getPair(accountId || ''));
+    }
+
+    // TODO: remove this
+    testQuery();
+  }
 
   // get_info loop
 
@@ -108,6 +120,25 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     console.log('Sent test: ', ecdhPubKeyString, msgB64);
   }
 
+  // query
+
+  function testQuery() {
+    console.log('Keypair:', keypair);
+    if (!keypair) {
+      return;
+    }
+    const signed = signQuery({
+      contract_id: 2,
+      request: {
+        BalanceOf: "0011223344001122334400112233440011223344"
+      },
+      nonce: 123
+    }, keypair);
+    console.log('signed:', signed);
+  }
+
+  // utilities
+
   function shortKey(key: string = '', len: number = 32): string {
     if (key.startsWith('0x')) {
       key = key.substring(2);
@@ -158,7 +189,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
           </div>
         </div>
       </section>
-      <AccountSelector onChange={setAccountId} />
+      <AccountSelector onChange={handleChangeAccount} />
       <Transfer
         accountId={accountId}
         ecdhPrivkey={ecdhPair?.privateKey}
