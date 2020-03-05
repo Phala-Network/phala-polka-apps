@@ -1,6 +1,6 @@
 import { hexToU8a } from '@polkadot/util';
 
-import { u8aToHex } from '../utils';
+import { u8aToHexCompact } from '../utils';
 
 const kAllowExport = true;
 const kAlgorithm = {name: "ECDH", namedCurve: "P-256"};
