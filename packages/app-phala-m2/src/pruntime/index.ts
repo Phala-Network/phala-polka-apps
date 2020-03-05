@@ -8,6 +8,7 @@ import * as Ecdh from './ecdh';
 import * as Aead from './aead';
 import * as Models from './models';
 import config from '../config';
+import {u8aToHexCompact} from '../utils';
 
 // Generates a radom nonce object used in pRuntime requests
 function nonce(): object {
@@ -107,7 +108,7 @@ export function signQuery<T>(query: Models.Query<T>, keypair?: KeyringPair) {
   if (keypair) {
     const sig = keypair.sign(data);
     signedQuery.origin = {
-      origin:  u8aToHex(keypair.publicKey).substring(2),
+      origin:  u8aToHexCompact(keypair.publicKey),
       sigB64: base64.fromByteArray(sig),
       sigType: keypair.type
     };
