@@ -25,7 +25,7 @@ import SummaryBar from './SummaryBar';
 import Transfer from './Transfer';
 import translate from './translate';
 
-import PRuntime, {measure, signQuery} from './pruntime';
+import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
 import * as ECDH from './pruntime/ecdh';
 

@@ -5,10 +5,12 @@
 import BN from 'bn.js';
 import React, { useState } from 'react';
 import { Button, InputAddress, InputBalance, TxButton } from '@polkadot/react-components';
+import { decodeAddress } from '@polkadot/util-crypto';
 
 import {encryptObj} from './pruntime';
 import Summary from './Summary';
 import {toApi} from './pruntime/models'
+import {u8aToHexCompact} from './utils';
 
 interface Props {
   accountId?: string | null;
@@ -28,16 +30,17 @@ export default function Transfer ({ accountId, ecdhPrivkey, ecdhPubkey, remoteEc
     if (!ecdhPrivkey || !ecdhPubkey || !remoteEcdhPubkeyHex || !recipientId || !amount) {
       return;
     }
-    console.log('recv', recipientId);
+    console.log('dest', recipientId);
+    const pubkeyData = decodeAddress(recipientId);
+    const pubkeyHex = u8aToHexCompact(pubkeyData);
     (async () => {
       const obj = {
-        Command: {
-          transfer: {
-            to: recipientId,  // TODO: ss58 to account id?
-            amount: amount.toString()
-          }
+        Transfer: {
+          dest: pubkeyHex,
+          value: amount.toString()
         }
       };
+      console.log('obj', obj)
       const cipher = await encryptObj(ecdhPrivkey, ecdhPubkey, remoteEcdhPubkeyHex, obj);
       const apiCipher = toApi(cipher);
       setCommand(JSON.stringify({Cipher: apiCipher}));
