@@ -1,4 +1,6 @@
-import { hexToU8a, u8aToHex } from '@polkadot/util';
+import { hexToU8a } from '@polkadot/util';
+
+import { u8aToHex } from '../utils';
 
 const kAllowExport = true;
 const kAlgorithm = {name: "ECDH", namedCurve: "P-256"};
@@ -42,6 +44,5 @@ export async function dumpKeyData(key: CryptoKey): Promise<ArrayBuffer> {
 
 export async function dumpKeyString(key: CryptoKey): Promise<string> {
   let data = await dumpKeyData(key);
-  const hexWith0x = u8aToHex(new Uint8Array(data));
-  return hexWith0x.substring(2);
+  return u8aToHexCompact(new Uint8Array(data));
 }

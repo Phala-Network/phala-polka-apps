@@ -37,12 +37,12 @@ export interface SignedQuery {
 
 export interface Origin {
   origin: string;
-  sig_b64: string;
-  sig_type: 'ed25519' | 'sr25519' | 'ecdsa';
+  sigB64: string;
+  sigType: 'ed25519' | 'sr25519' | 'ecdsa';
 }
 
 export interface Query<T> {
-  contract_id: number;
+  contractId: number;
   nonce: number;
   request: T;
 }
