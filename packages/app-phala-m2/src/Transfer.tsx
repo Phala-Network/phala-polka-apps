@@ -13,20 +13,19 @@ import {ss58ToHex} from './utils';
 
 interface Props {
   accountId?: string | null;
-  ecdhPrivkey: CryptoKey | undefined,
-  ecdhPubkey: CryptoKey | undefined,
+  ecdhPair: CryptoKeyPair | null,
   remoteEcdhPubkeyHex: string | undefined,
 }
 
 const kContractId = 2;
 
-export default function Transfer ({ accountId, ecdhPrivkey, ecdhPubkey, remoteEcdhPubkeyHex }: Props): React.ReactElement<Props> {
+export default function Transfer ({ accountId, ecdhPair, remoteEcdhPubkeyHex }: Props): React.ReactElement<Props> {
   const [amount, setAmount] = useState<BN | undefined | null>(null);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [command, setCommand] = useState('');
 
   React.useEffect(() => {
-    if (!ecdhPrivkey || !ecdhPubkey || !remoteEcdhPubkeyHex || !recipientId || !amount) {
+    if (!ecdhPair || !remoteEcdhPubkeyHex || !recipientId || !amount) {
       return;
     }
     console.log('dest', recipientId);
@@ -39,11 +38,11 @@ export default function Transfer ({ accountId, ecdhPrivkey, ecdhPubkey, remoteEc
         }
       };
       console.log('obj', obj)
-      const cipher = await encryptObj(ecdhPrivkey, ecdhPubkey, remoteEcdhPubkeyHex, obj);
+      const cipher = await encryptObj(ecdhPair, remoteEcdhPubkeyHex, obj);
       const apiCipher = toApi(cipher);
       setCommand(JSON.stringify({Cipher: apiCipher}));
     })()
-  }, [ecdhPrivkey, ecdhPubkey, remoteEcdhPubkeyHex, recipientId, amount])
+  }, [ecdhPair, remoteEcdhPubkeyHex, recipientId, amount])
 
   return (
     <section>
