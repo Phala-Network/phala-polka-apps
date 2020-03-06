@@ -121,7 +121,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       alert('Account not ready');
       return;
     }
-    const result = await new PRuntime().query(2, {
+    const result: object = await new PRuntime().query(2, {
       FreeBalance: {
         account: ss58ToHex(accountId)
       }
