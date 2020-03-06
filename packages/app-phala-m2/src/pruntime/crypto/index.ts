@@ -18,8 +18,50 @@ export async function dumpKeyString(key: CryptoKey): Promise<string> {
   return u8aToHexCompact(new Uint8Array(data));
 }
 
+interface EcdhChannelCore {
+  localPair: CryptoKeyPair;
+  remotePubkey?: CryptoKey;
+  agreedSecret?: CryptoKey;
+}
+
+export interface EcdhChannel {
+  core: EcdhChannelCore;
+  localPubkeyHex?: string;
+  localPrivkeyHex?: string;
+  remotePubkeyHex?: string;
+  agreedSecretHex?: string;
+}
+
+export async function newChannel(): Promise<EcdhChannel> {
+  const localPair = await Ecdh.generateKeyPair();
+  return {
+    core: {localPair},
+    localPubkeyHex: await dumpKeyString(localPair.publicKey),
+    localPrivkeyHex: await dumpKeyString(localPair.privateKey)
+  };
+}
+
+export async function joinChannel(ch: EcdhChannel, remotePubkeyHex: string): Promise<EcdhChannel> {
+  if (ch.remotePubkeyHex == remotePubkeyHex) {
+    return ch;
+  }
+  const localPair = ch.core.localPair;
+  const remotePubkey = await Ecdh.importPubkeyHex(remotePubkeyHex);
+  const agreedSecret = await Ecdh.deriveSecretKey(localPair.privateKey, remotePubkey);
+
+  return {
+    core: {localPair, remotePubkey, agreedSecret},
+    localPubkeyHex: await dumpKeyString(localPair.publicKey),
+    localPrivkeyHex: await dumpKeyString(localPair.privateKey),
+    agreedSecretHex: await dumpKeyString(agreedSecret),
+    remotePubkeyHex
+  }
+}
+
 export default {
   Aead, Ecdh,
   dumpKeyData,
-  dumpKeyString
+  dumpKeyString,
+  newChannel,
+  joinChannel
 }
