@@ -139,7 +139,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       FreeBalance: {
         account: ss58ToHex(accountId)
       }
-    }, ecdhPair.privateKey, ecdhPair.publicKey, info.ecdhPublicKey, pair);
+    }, ecdhPair, info.ecdhPublicKey, pair);
 
     setQueryResult(JSON.stringify(result));
   }
@@ -204,8 +204,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       </section>
       <Transfer
         accountId={accountId}
-        ecdhPrivkey={ecdhPair?.privateKey}
-        ecdhPubkey={ecdhPair?.publicKey}
+        ecdhPair={ecdhPair}
         remoteEcdhPubkeyHex={info?.ecdhPublicKey}
       />
     </main>
