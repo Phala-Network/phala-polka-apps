@@ -25,9 +25,9 @@ export interface Payload {
 }
 
 export interface AeadCipher {
-  ivB64: String;
-  cipherB64: String;
-  pubkeyB64: String;
+  ivB64: string;
+  cipherB64: string;
+  pubkeyB64: string;
 }
 
 export interface SignedQuery {
