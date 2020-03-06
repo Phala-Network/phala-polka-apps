@@ -4,17 +4,17 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import axios, {AxiosInstance} from 'axios';
 import * as base64 from 'base64-js';
 
-import * as Ecdh from './ecdh';
-import * as Aead from './aead';
+import Crypto from './crypto';
 import * as Models from './models';
 import config from '../config';
 import {u8aToHexCompact} from '../utils';
+
+const {Aead, Ecdh} = Crypto;
 
 // Generates a radom nonce object used in pRuntime requests
 function nonce(): object {
   return { id: Math.random()*65535 | 0 };
 }
-
 // pRuntime API response type
 interface ApiResponse {
   payload: string;
@@ -89,8 +89,8 @@ export async function encrypt(ecdhPair: CryptoKeyPair, remotePkHex: string, data
   const key = await Ecdh.deriveSecretKey(ecdhPair.privateKey, remotePkHex);
   const iv = Aead.generateIv();
   const cipher = await Aead.encrypt(iv, key, data);
-  const pkData = await Ecdh.dumpKeyData(ecdhPair.publicKey);
-  console.log('AGREED', await Ecdh.dumpKeyString(key));
+  const pkData = await Crypto.dumpKeyData(ecdhPair.publicKey);
+  console.log('AGREED', await Crypto.dumpKeyString(key));
   console.log('DATA', u8aToHex(new Uint8Array(data)));
   console.log('CIPHER', u8aToHex(new Uint8Array(cipher)));
   return {

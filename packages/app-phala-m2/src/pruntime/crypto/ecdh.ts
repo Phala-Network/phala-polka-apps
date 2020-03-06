@@ -1,7 +1,5 @@
 import { hexToU8a } from '@polkadot/util';
 
-import { u8aToHexCompact } from '../utils';
-
 const kAllowExport = true;
 const kAlgorithm = {name: "ECDH", namedCurve: "P-256"};
 const kSymmetricAlgorithm = {name: 'AES-GCM', length: 256};
@@ -29,20 +27,4 @@ export async function deriveSecretKey(privkey: CryptoKey, hexPubkey: string): Pr
   );
 
   return shared;
-}
-
-export async function dumpKeyData(key: CryptoKey): Promise<ArrayBuffer> {
-  if (key.type == 'public' || key.type == 'secret') {
-    return await crypto.subtle.exportKey('raw', key);
-  } else if (key.type == 'private') {
-    // dump pkcs8
-    return await crypto.subtle.exportKey('pkcs8', key);
-  } else {
-    throw new Error('Unsupported key type');
-  }
-}
-
-export async function dumpKeyString(key: CryptoKey): Promise<string> {
-  let data = await dumpKeyData(key);
-  return u8aToHexCompact(new Uint8Array(data));
 }
