@@ -27,7 +27,7 @@ import translate from './translate';
 
 import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
-import * as Ecdh from './pruntime/ecdh';
+import Crypto from './pruntime/crypto';
 import {ss58ToHex} from './utils';
 
 // define our internal types
@@ -83,10 +83,10 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   const [aesKeyString, setAesKeyString] = useState('');
 
   async function genEcdhPair() {
-    const pair = await Ecdh.generateKeyPair();
+    const pair = await Crypto.Ecdh.generateKeyPair();
     setEcdhPair(pair);
-    setEcdhPubKeyString(await Ecdh.dumpKeyString(pair.publicKey));
-    setEcdhPrivKeyString(await Ecdh.dumpKeyString(pair.privateKey));
+    setEcdhPubKeyString(await Crypto.dumpKeyString(pair.publicKey));
+    setEcdhPrivKeyString(await Crypto.dumpKeyString(pair.privateKey));
   }
   React.useEffect(() => {genEcdhPair()}, []);
   React.useEffect(() => {
@@ -96,9 +96,9 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   }, [info]);
   async function handleECDHKeys() {
     if (runtimePubkeyHex && ecdhPair) {
-      const aesKey = await Ecdh.deriveSecretKey(ecdhPair.privateKey, runtimePubkeyHex);
+      const aesKey = await Crypto.Ecdh.deriveSecretKey(ecdhPair.privateKey, runtimePubkeyHex);
       setAesKey(aesKey);
-      setAesKeyString(await Ecdh.dumpKeyString(aesKey));
+      setAesKeyString(await Crypto.dumpKeyString(aesKey));
     }
   }
   React.useEffect(() => {handleECDHKeys()}, [runtimePubkeyHex, ecdhPair])
