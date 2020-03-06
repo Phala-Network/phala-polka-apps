@@ -68,13 +68,18 @@ class PRuntime {
   }
 
   // API query
-  async query<T>(contractId: number, request: T, keypair?: KeyringPair) {
-    const q = signQuery({
+  async query<T>(contractId: number, request: T,
+                 ecdhSk: CryptoKey, ecddhPk: CryptoKey, ecdhRemotePkHex: string,
+                 keypair?: KeyringPair) {
+    const query: Models.Query<T> = {
       contractId: contractId,
-      request: request,
       nonce: Math.random()*65535 | 0,
-    }, keypair);
-    return await this.reqTyped<Models.TestResp>('query', q);
+      request,
+    };
+    const cipher = await encryptObj(ecdhSk, ecddhPk, ecdhRemotePkHex, query);
+    const payload = {Cipher: cipher};  // May support plain text in the future.
+    const q = signQuery(payload, keypair);
+    return await this.reqTyped<object>('query', q);
   }
 }
 
@@ -85,6 +90,9 @@ export async function encrypt(sk: CryptoKey, pk: CryptoKey, remotePkHex: string,
   const iv = Aead.generateIv();
   const cipher = await Aead.encrypt(iv, key, data);
   const pkData = await Ecdh.dumpKeyData(pk);
+  console.log('AGREED', await Ecdh.dumpKeyString(key));
+  console.log('DATA', u8aToHex(new Uint8Array(data)));
+  console.log('CIPHER', u8aToHex(new Uint8Array(cipher)));
   return {
     ivB64: base64.fromByteArray(iv),
     cipherB64: base64.fromByteArray(new Uint8Array(cipher)),
@@ -95,16 +103,18 @@ export async function encrypt(sk: CryptoKey, pk: CryptoKey, remotePkHex: string,
 // Serialize and encrypt `obj` by AEAD-AES-GCM with the secret key derived by ECDH
 export async function encryptObj(sk: CryptoKey, pk: CryptoKey, remotePkHex: string, obj: any)
 : Promise<Models.AeadCipher> {
-  const objJson = JSON.stringify(obj);
+  console.log('encryptObj', [sk, pk, remotePkHex, obj]);
+  const apiObj = Models.toApi(obj);
+  const objJson = JSON.stringify(apiObj);
   const data = stringToU8a(objJson);
   return await encrypt(sk, pk, remotePkHex, data);
 }
 
-export function signQuery<T>(query: Models.Query<T>, keypair?: KeyringPair) {
+export function signQuery(query: object, keypair?: KeyringPair) {
   const apiQuery = Models.toApi(query);
   const queryJson = JSON.stringify(apiQuery);
   const data = stringToU8a(queryJson);
-  const signedQuery: Models.SignedQuery = { query: queryJson };
+  const signedQuery: Models.SignedQuery = { queryPayload: queryJson };
   if (keypair) {
     const sig = keypair.sign(data);
     signedQuery.origin = {

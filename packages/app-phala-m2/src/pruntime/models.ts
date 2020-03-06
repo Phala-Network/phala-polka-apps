@@ -31,7 +31,7 @@ export interface AeadCipher {
 }
 
 export interface SignedQuery {
-  query: string;
+  queryPayload: string;
   origin?: Origin;
 }
 
