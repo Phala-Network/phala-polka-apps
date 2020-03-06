@@ -191,7 +191,6 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       <Transfer
         accountId={accountId}
         ecdhChannel={ecdhChannel}
-        remoteEcdhPubkeyHex={info?.ecdhPublicKey}
       />
     </main>
   );
