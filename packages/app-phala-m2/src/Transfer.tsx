@@ -9,7 +9,7 @@ import { Button, InputAddress, InputBalance, TxButton } from '@polkadot/react-co
 import {encryptObj} from './pruntime';
 import Summary from './Summary';
 import {toApi} from './pruntime/models'
-import Crypto, {EcdhChannel} from './pruntime/crypto';
+import {EcdhChannel} from './pruntime/crypto';
 import {ss58ToHex} from './utils';
 
 interface Props {
@@ -39,7 +39,7 @@ export default function Transfer ({ accountId, ecdhChannel }: Props): React.Reac
         }
       };
       console.log('obj', obj)
-      const cipher = await encryptObj(ecdhChannel.core.localPair, ecdhChannel.core.remotePubkey!, obj);
+      const cipher = await encryptObj(ecdhChannel, obj);
       const apiCipher = toApi(cipher);
       setCommand(JSON.stringify({Cipher: apiCipher}));
     })()
