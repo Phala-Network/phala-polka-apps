@@ -5,12 +5,11 @@
 import BN from 'bn.js';
 import React, { useState } from 'react';
 import { Button, InputAddress, InputBalance, TxButton } from '@polkadot/react-components';
-import { decodeAddress } from '@polkadot/util-crypto';
 
 import {encryptObj} from './pruntime';
 import Summary from './Summary';
 import {toApi} from './pruntime/models'
-import {u8aToHexCompact} from './utils';
+import {ss58ToHex} from './utils';
 
 interface Props {
   accountId?: string | null;
@@ -31,8 +30,7 @@ export default function Transfer ({ accountId, ecdhPrivkey, ecdhPubkey, remoteEc
       return;
     }
     console.log('dest', recipientId);
-    const pubkeyData = decodeAddress(recipientId);
-    const pubkeyHex = u8aToHexCompact(pubkeyData);
+    const pubkeyHex = ss58ToHex(recipientId);
     (async () => {
       const obj = {
         Transfer: {
