@@ -125,7 +125,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       FreeBalance: {
         account: ss58ToHex(accountId)
       }
-    }, ecdhChannel.core.localPair, ecdhChannel.core.remotePubkey, pair);
+    }, ecdhChannel, pair);
 
     setQueryResult(JSON.stringify(result));
   }

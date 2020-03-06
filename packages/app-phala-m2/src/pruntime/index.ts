@@ -4,7 +4,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import axios, {AxiosInstance} from 'axios';
 import * as base64 from 'base64-js';
 
-import Crypto from './crypto';
+import Crypto, { EcdhChannel } from './crypto';
 import * as Models from './models';
 import config from '../config';
 import {u8aToHexCompact} from '../utils';
@@ -68,15 +68,13 @@ class PRuntime {
   }
 
   // API query
-  async query<T>(contractId: number, request: T,
-                 ecdhPair: CryptoKeyPair, remotePubkey: CryptoKey,
-                 keypair?: KeyringPair) {
+  async query<T>(contractId: number, request: T, channel: EcdhChannel, keypair?: KeyringPair) {
     const query: Models.Query<T> = {
       contractId: contractId,
       nonce: Math.random()*65535 | 0,
       request,
     };
-    const cipher = await encryptObj(ecdhPair, remotePubkey, query);
+    const cipher = await encryptObj(channel, query);
     const payload = {Cipher: cipher};  // May support plain text in the future.
     const q = signQuery(payload, keypair);
     return await this.reqTyped<object>('query', q);
@@ -84,13 +82,15 @@ class PRuntime {
 }
 
 // Encrypt `data` by AEAD-AES-GCM with the secret key derived by ECDH
-export async function encrypt(ecdhPair: CryptoKeyPair, remotePubkey: CryptoKey, data: ArrayBuffer)
-: Promise<Models.AeadCipher> {
-  const key = await Ecdh.deriveSecretKey(ecdhPair.privateKey, remotePubkey);
+export async function encrypt(channel: EcdhChannel, data: ArrayBuffer): Promise<Models.AeadCipher> {
+  if (!channel.core.agreedSecret) {
+    throw new Error('EcdhChannel remote not joined');
+  }
+  const key = channel.core.agreedSecret;
   const iv = Aead.generateIv();
   const cipher = await Aead.encrypt(iv, key, data);
-  const pkData = await Crypto.dumpKeyData(ecdhPair.publicKey);
-  console.log('AGREED', await Crypto.dumpKeyString(key));
+  const pkData = await Crypto.dumpKeyData(channel.core.localPair.publicKey);
+  console.log('AGREED', channel.agreedSecretHex);
   console.log('DATA', u8aToHex(new Uint8Array(data)));
   console.log('CIPHER', u8aToHex(new Uint8Array(cipher)));
   return {
@@ -101,13 +101,13 @@ export async function encrypt(ecdhPair: CryptoKeyPair, remotePubkey: CryptoKey, 
 }
 
 // Serialize and encrypt `obj` by AEAD-AES-GCM with the secret key derived by ECDH
-export async function encryptObj(ecdhPair: CryptoKeyPair, remotePubkey: CryptoKey, obj: any)
+export async function encryptObj(channel: EcdhChannel, obj: any)
 : Promise<Models.AeadCipher> {
-  console.log('encryptObj', [ecdhPair, remotePubkey, obj]);
+  console.log('encryptObj', [channel, obj]);
   const apiObj = Models.toApi(obj);
   const objJson = JSON.stringify(apiObj);
   const data = stringToU8a(objJson);
-  return await encrypt(ecdhPair, remotePubkey, data);
+  return await encrypt(channel, data);
 }
 
 export function signQuery(query: object, keypair?: KeyringPair) {
