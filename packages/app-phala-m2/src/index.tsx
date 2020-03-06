@@ -27,7 +27,8 @@ import translate from './translate';
 
 import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
-import * as ECDH from './pruntime/ecdh';
+import * as Ecdh from './pruntime/ecdh';
+import {ss58ToHex} from './utils';
 
 // define our internal types
 interface Props extends AppProps, I18nProps {}
@@ -82,10 +83,10 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   const [aesKeyString, setAesKeyString] = useState('');
 
   async function genEcdhPair() {
-    const pair = await ECDH.generateKeyPair();
+    const pair = await Ecdh.generateKeyPair();
     setEcdhPair(pair);
-    setEcdhPubKeyString(await ECDH.dumpKeyString(pair.publicKey));
-    setEcdhPrivKeyString(await ECDH.dumpKeyString(pair.privateKey));
+    setEcdhPubKeyString(await Ecdh.dumpKeyString(pair.publicKey));
+    setEcdhPrivKeyString(await Ecdh.dumpKeyString(pair.privateKey));
   }
   React.useEffect(() => {genEcdhPair()}, []);
   React.useEffect(() => {
@@ -95,14 +96,9 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   }, [info]);
   async function handleECDHKeys() {
     if (runtimePubkeyHex && ecdhPair) {
-      const aesKey = await ECDH.deriveSecretKey(ecdhPair.privateKey, runtimePubkeyHex);
+      const aesKey = await Ecdh.deriveSecretKey(ecdhPair.privateKey, runtimePubkeyHex);
       setAesKey(aesKey);
-      setAesKeyString(await ECDH.dumpKeyString(aesKey));
-
-      // send test request
-      const API = new PRuntime();
-      console.log(`Sending test with pk: ${ecdhPubKeyString}`);
-      await API.test({testEcdh: { pubkeyHex: ecdhPubKeyString }});
+      setAesKeyString(await Ecdh.dumpKeyString(aesKey));
     }
   }
   React.useEffect(() => {handleECDHKeys()}, [runtimePubkeyHex, ecdhPair])
@@ -121,17 +117,31 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     console.log('Sent test: ', ecdhPubKeyString, msgB64);
   }
 
-  // query
+  // query balance
 
-  function testQuery() {
+  const [queryResult, setQueryResult] = useState<string | null>(null);
+
+  async function testQuery() {
     const pair = keypair;
     console.log('Keypair:', pair);
     if (!pair) {
       return;
     }
-    new PRuntime().query(2, {
-      FreeBalance: "0011223344001122334400112233440011223344"
-    }, pair);
+    if (!ecdhPair || !info?.ecdhPublicKey) {
+      alert('ECDH not ready');
+      return;
+    }
+    if (!accountId) {
+      alert('Account not ready');
+      return;
+    }
+    const result = await new PRuntime().query(2, {
+      FreeBalance: {
+        account: ss58ToHex(accountId)
+      }
+    }, ecdhPair.privateKey, ecdhPair.publicKey, info.ecdhPublicKey, pair);
+
+    setQueryResult(JSON.stringify(result));
   }
 
   // utilities
@@ -188,8 +198,9 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       </section>
       <AccountSelector onChange={setAccountId} />
       <section>
-        accid: {accountId}
-        <button onClick={testQuery}>send!</button>
+        <p>AccountId: {accountId}</p>
+        <button onClick={testQuery}>FreeBalance</button>
+        <p>{queryResult}</p>
       </section>
       <Transfer
         accountId={accountId}
