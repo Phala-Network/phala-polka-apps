@@ -69,14 +69,14 @@ class PRuntime {
 
   // API query
   async query<T>(contractId: number, request: T,
-                 ecdhPair: CryptoKeyPair, ecdhRemotePkHex: string,
+                 ecdhPair: CryptoKeyPair, remotePubkey: CryptoKey,
                  keypair?: KeyringPair) {
     const query: Models.Query<T> = {
       contractId: contractId,
       nonce: Math.random()*65535 | 0,
       request,
     };
-    const cipher = await encryptObj(ecdhPair, ecdhRemotePkHex, query);
+    const cipher = await encryptObj(ecdhPair, remotePubkey, query);
     const payload = {Cipher: cipher};  // May support plain text in the future.
     const q = signQuery(payload, keypair);
     return await this.reqTyped<object>('query', q);
@@ -84,9 +84,9 @@ class PRuntime {
 }
 
 // Encrypt `data` by AEAD-AES-GCM with the secret key derived by ECDH
-export async function encrypt(ecdhPair: CryptoKeyPair, remotePkHex: string, data: ArrayBuffer)
+export async function encrypt(ecdhPair: CryptoKeyPair, remotePubkey: CryptoKey, data: ArrayBuffer)
 : Promise<Models.AeadCipher> {
-  const key = await Ecdh.deriveSecretKey(ecdhPair.privateKey, remotePkHex);
+  const key = await Ecdh.deriveSecretKey(ecdhPair.privateKey, remotePubkey);
   const iv = Aead.generateIv();
   const cipher = await Aead.encrypt(iv, key, data);
   const pkData = await Crypto.dumpKeyData(ecdhPair.publicKey);
@@ -101,13 +101,13 @@ export async function encrypt(ecdhPair: CryptoKeyPair, remotePkHex: string, data
 }
 
 // Serialize and encrypt `obj` by AEAD-AES-GCM with the secret key derived by ECDH
-export async function encryptObj(ecdhPair: CryptoKeyPair, remotePkHex: string, obj: any)
+export async function encryptObj(ecdhPair: CryptoKeyPair, remotePubkey: CryptoKey, obj: any)
 : Promise<Models.AeadCipher> {
-  console.log('encryptObj', [ecdhPair, remotePkHex, obj]);
+  console.log('encryptObj', [ecdhPair, remotePubkey, obj]);
   const apiObj = Models.toApi(obj);
   const objJson = JSON.stringify(apiObj);
   const data = stringToU8a(objJson);
-  return await encrypt(ecdhPair, remotePkHex, data);
+  return await encrypt(ecdhPair, remotePubkey, data);
 }
 
 export function signQuery(query: object, keypair?: KeyringPair) {

@@ -9,23 +9,24 @@ import { Button, InputAddress, InputBalance, TxButton } from '@polkadot/react-co
 import {encryptObj} from './pruntime';
 import Summary from './Summary';
 import {toApi} from './pruntime/models'
+import Crypto, {EcdhChannel} from './pruntime/crypto';
 import {ss58ToHex} from './utils';
 
 interface Props {
   accountId?: string | null;
-  ecdhPair: CryptoKeyPair | null,
-  remoteEcdhPubkeyHex: string | undefined,
+  ecdhChannel: EcdhChannel | null;
 }
 
 const kContractId = 2;
 
-export default function Transfer ({ accountId, ecdhPair, remoteEcdhPubkeyHex }: Props): React.ReactElement<Props> {
+export default function Transfer ({ accountId, ecdhChannel }: Props): React.ReactElement<Props> {
   const [amount, setAmount] = useState<BN | undefined | null>(null);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [command, setCommand] = useState('');
 
   React.useEffect(() => {
-    if (!ecdhPair || !remoteEcdhPubkeyHex || !recipientId || !amount) {
+    if (!ecdhChannel || !ecdhChannel.core.remotePubkey || !recipientId || !amount) {
+      console.log([ecdhChannel, recipientId, amount]);
       return;
     }
     console.log('dest', recipientId);
@@ -38,11 +39,11 @@ export default function Transfer ({ accountId, ecdhPair, remoteEcdhPubkeyHex }: 
         }
       };
       console.log('obj', obj)
-      const cipher = await encryptObj(ecdhPair, remoteEcdhPubkeyHex, obj);
+      const cipher = await encryptObj(ecdhChannel.core.localPair, ecdhChannel.core.remotePubkey!, obj);
       const apiCipher = toApi(cipher);
       setCommand(JSON.stringify({Cipher: apiCipher}));
     })()
-  }, [ecdhPair, remoteEcdhPubkeyHex, recipientId, amount])
+  }, [ecdhChannel, recipientId, amount])
 
   return (
     <section>

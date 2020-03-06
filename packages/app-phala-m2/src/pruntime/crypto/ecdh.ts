@@ -14,12 +14,14 @@ async function importPubkey(key: Uint8Array): Promise<CryptoKey> {
   return await crypto.subtle.importKey('raw', key, kAlgorithm, true, []);
 }
 
-export async function deriveSecretKey(privkey: CryptoKey, hexPubkey: string): Promise<CryptoKey> {
-  const pubkeyData = hexToU8a('0x' + hexPubkey);
-  const pubkey = await importPubkey(pubkeyData);
-  
+export async function importPubkeyHex(pubkeyHex: string): Promise<CryptoKey> {
+  const pubkeyData = hexToU8a('0x' + pubkeyHex);
+  return await importPubkey(pubkeyData);
+}
+
+export async function deriveSecretKey(privkey: CryptoKey, remotePubkey: CryptoKey): Promise<CryptoKey> {  
   const shared = await crypto.subtle.deriveKey(
-    {name: 'ECDH', public: pubkey},
+    {name: 'ECDH', public: remotePubkey},
     privkey,
     kSymmetricAlgorithm,
     kAllowExport,
