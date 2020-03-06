@@ -1,4 +1,4 @@
-import { stringToU8a, u8aToHex } from '@polkadot/util';
+import { stringToU8a, u8aToHex, u8aToString } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 
 import axios, {AxiosInstance} from 'axios';
@@ -68,7 +68,7 @@ class PRuntime {
   }
 
   // API query
-  async query<T>(contractId: number, request: T, channel: EcdhChannel, keypair?: KeyringPair) {
+  async query<R, T>(contractId: number, request: T, channel: EcdhChannel, keypair?: KeyringPair) {
     const query: Models.Query<T> = {
       contractId: contractId,
       nonce: Math.random()*65535 | 0,
@@ -76,8 +76,37 @@ class PRuntime {
     };
     const cipher = await encryptObj(channel, query);
     const payload = {Cipher: cipher};  // May support plain text in the future.
-    const q = signQuery(payload, keypair);
-    return await this.reqTyped<object>('query', q);
+    const q = signQuery(payload, keypair)
+    const respPayload = await this.reqTyped<Models.Payload>('query', q);
+    // Decode payload
+    return await decodePayload<R>(channel, respPayload);
+  }
+}
+
+export async function decrypt(channel: EcdhChannel, cipher: Models.AeadCipher): Promise<ArrayBuffer> {
+  if (!channel.core.agreedSecret) {
+    throw new Error('EcdhChannel remote not joined');
+  }
+  const iv = base64.toByteArray(cipher.ivB64);
+  const cipherData = base64.toByteArray(cipher.cipherB64);
+  // const pubkeyB64 = base64.toByteArray(cipher.pubkeyB64);  // TODO: check pubkey
+  const msgData = await Aead.decrypt(iv, channel.core.agreedSecret, cipherData);
+  return msgData;
+}
+
+export async function decryptObj<T>(channel: EcdhChannel, cipher: Models.AeadCipher): Promise<T> {
+  const data = await decrypt(channel, cipher);
+  const json = u8aToString(new Uint8Array(data));
+  const apiObj = JSON.parse(json);
+  return Models.fromApi<T>(apiObj);
+}
+
+export async function decodePayload<T>(channel: EcdhChannel, payload: Models.Payload): Promise<T> {
+  if (payload.Plain) {
+    const apiObj = JSON.parse(payload.Plain);
+    return Models.fromApi<T>(apiObj);
+  } else {
+    return await decryptObj<T>(channel, payload.Cipher!);
   }
 }
 
