@@ -27,7 +27,7 @@ import translate from './translate';
 
 import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
-import Crypto from './pruntime/crypto';
+import Crypto, {EcdhChannel} from './pruntime/crypto';
 import {ss58ToHex} from './utils';
 
 // define our internal types
@@ -75,33 +75,19 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   // ecdh sign
 
   const [message, setMessage] = useState('');
-  const [ecdhPair, setEcdhPair] = useState<CryptoKeyPair | null>(null);
-  const [runtimePubkeyHex, setRuntimePubkeyHex] = useState('');
-  const [aesKey, setAesKey] = useState<CryptoKey | null>(null);
-  const [ecdhPubKeyString, setEcdhPubKeyString] = useState('');
-  const [ecdhPrivKeyString, setEcdhPrivKeyString] = useState('');
-  const [aesKeyString, setAesKeyString] = useState('');
+  const [ecdhChannel, setEcdhChannel] = useState<EcdhChannel | null>(null);
 
-  async function genEcdhPair() {
-    const pair = await Crypto.Ecdh.generateKeyPair();
-    setEcdhPair(pair);
-    setEcdhPubKeyString(await Crypto.dumpKeyString(pair.publicKey));
-    setEcdhPrivKeyString(await Crypto.dumpKeyString(pair.privateKey));
+  async function newChanel() {
+    const ch = await Crypto.newChannel();
+    setEcdhChannel(ch);
   }
-  React.useEffect(() => {genEcdhPair()}, []);
-  React.useEffect(() => {
-    if (info && runtimePubkeyHex != info.ecdhPublicKey) {
-      setRuntimePubkeyHex(info.ecdhPublicKey);
-    }
-  }, [info]);
-  async function handleECDHKeys() {
-    if (runtimePubkeyHex && ecdhPair) {
-      const aesKey = await Crypto.Ecdh.deriveSecretKey(ecdhPair.privateKey, runtimePubkeyHex);
-      setAesKey(aesKey);
-      setAesKeyString(await Crypto.dumpKeyString(aesKey));
+  async function updateChannel() {
+    if (ecdhChannel && info && info.ecdhPublicKey) {
+       setEcdhChannel(await Crypto.joinChannel(ecdhChannel, info?.ecdhPublicKey));
     }
   }
-  React.useEffect(() => {handleECDHKeys()}, [runtimePubkeyHex, ecdhPair])
+  React.useEffect(() => {newChanel()}, []);
+  React.useEffect(() => {updateChannel()}, [info]);
 
   async function testSign() {
     const API = new PRuntime();
@@ -110,11 +96,11 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     const msgB64 = base64.fromByteArray(data);
     await API.test({
       testEcdh: { 
-        pubkeyHex: ecdhPubKeyString,
+        pubkeyHex: ecdhChannel?.localPubkeyHex,
         messageB64: msgB64,
       }
     })
-    console.log('Sent test: ', ecdhPubKeyString, msgB64);
+    console.log('Sent test: ', ecdhChannel?.localPubkeyHex, msgB64);
   }
 
   // query balance
@@ -127,7 +113,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     if (!pair) {
       return;
     }
-    if (!ecdhPair || !info?.ecdhPublicKey) {
+    if (!ecdhChannel || !ecdhChannel.core.agreedSecret || !ecdhChannel.core.remotePubkey || !info) {
       alert('ECDH not ready');
       return;
     }
@@ -139,7 +125,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       FreeBalance: {
         account: ss58ToHex(accountId)
       }
-    }, ecdhPair, info.ecdhPublicKey, pair);
+    }, ecdhChannel.core.localPair, ecdhChannel.core.remotePubkey, pair);
 
     setQueryResult(JSON.stringify(result));
   }
@@ -186,10 +172,10 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
             <div>
               <table>
                 <tbody>
-                  <tr><td>ECDH Public</td><td>{shortKey(ecdhPubKeyString)}</td></tr>
-                  <tr><td>ECDH Private</td><td>{shortKey(ecdhPrivKeyString)}</td></tr>
+                  <tr><td>ECDH Public</td><td>{shortKey(ecdhChannel?.localPubkeyHex)}</td></tr>
+                  <tr><td>ECDH Private</td><td>{shortKey(ecdhChannel?.localPrivkeyHex)}</td></tr>
                   <tr><td>pRuntime Public</td><td>{shortKey(info?.ecdhPublicKey)}</td></tr>
-                  <tr><td>Derived Secret</td><td>{shortKey(aesKeyString)}</td></tr>
+                  <tr><td>Derived Secret</td><td>{shortKey(ecdhChannel?.agreedSecretHex)}</td></tr>
                 </tbody>
               </table>
             </div>
@@ -204,7 +190,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       </section>
       <Transfer
         accountId={accountId}
-        ecdhPair={ecdhPair}
+        ecdhChannel={ecdhChannel}
         remoteEcdhPubkeyHex={info?.ecdhPublicKey}
       />
     </main>
