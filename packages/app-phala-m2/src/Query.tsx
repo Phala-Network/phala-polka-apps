@@ -77,7 +77,7 @@ export default function Query ({ contractId, accountId, ecdhChannel }: Props): R
         <div className='large'>
           <QuerySection>
             <Button
-              icon='search'
+              icon='money bill alternate outline'
               label='TotalIssuannce'
               isPrimary
               onClick={() => queryTotalIssuance()}
@@ -99,7 +99,7 @@ export default function Query ({ contractId, accountId, ecdhChannel }: Props): R
           <Card>
             <p><strong>response</strong></p>
             { queryResult?.TotalIssuance?.totalIssuance && (
-              <Bubble color='yellow' icon='adjust' label='total issuance'>
+              <Bubble color='teal' icon='money bill alternate outline' label='total issuance'>
                 <Balance
                   balance={new BN(queryResult.TotalIssuance.totalIssuance)}
                   params={'dummy'}

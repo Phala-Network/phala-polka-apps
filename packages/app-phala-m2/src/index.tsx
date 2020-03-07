@@ -141,12 +141,12 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
         </div>
       </section>
       <AccountSelector onChange={setAccountId} />
-      <Query
-        contractId={2}
+      <Transfer
         accountId={accountId}
         ecdhChannel={ecdhChannel}
       />
-      <Transfer
+      <Query
+        contractId={2}
         accountId={accountId}
         ecdhChannel={ecdhChannel}
       />
