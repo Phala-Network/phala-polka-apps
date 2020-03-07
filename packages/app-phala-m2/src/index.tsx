@@ -9,9 +9,6 @@
 import { AppProps, I18nProps } from '@polkadot/react-components/types';
 import { Input } from '@polkadot/react-components';
 import { stringToU8a } from '@polkadot/util';
-import { KeyringPair } from '@polkadot/keyring/types';
-import keyring from '@polkadot/ui-keyring';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 // external imports (including those found in the packages/*
 // of this repo)
@@ -23,28 +20,18 @@ import * as base64 from 'base64-js';
 import AccountSelector from './AccountSelector';
 import SummaryBar from './SummaryBar';
 import Transfer from './Transfer';
+import Query from './Query';
 import translate from './translate';
 
 import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
 import Crypto, {EcdhChannel} from './pruntime/crypto';
-import {ss58ToHex} from './utils';
 
 // define our internal types
 interface Props extends AppProps, I18nProps {}
 
 function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   const [accountId, setAccountId] = useState<string | null>(null);
-  const [keypair, setKeypair] = useState<KeyringPair | null>(null);
-  React.useEffect(() => {
-    (async () => {
-      await cryptoWaitReady();
-      if (accountId) {
-        const pair = keyring.getPair(accountId || '');
-        setKeypair(pair);
-      }
-    })();
-  }, [accountId]);
 
   // get_info loop
 
@@ -103,33 +90,6 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     console.log('Sent test: ', ecdhChannel?.localPubkeyHex, msgB64);
   }
 
-  // query balance
-
-  const [queryResult, setQueryResult] = useState<string | null>(null);
-
-  async function testQuery() {
-    const pair = keypair;
-    console.log('Keypair:', pair);
-    if (!pair) {
-      return;
-    }
-    if (!ecdhChannel || !ecdhChannel.core.agreedSecret || !ecdhChannel.core.remotePubkey || !info) {
-      alert('ECDH not ready');
-      return;
-    }
-    if (!accountId) {
-      alert('Account not ready');
-      return;
-    }
-    const result: object = await new PRuntime().query(2, {
-      FreeBalance: {
-        account: ss58ToHex(accountId)
-      }
-    }, ecdhChannel, pair);
-
-    setQueryResult(JSON.stringify(result));
-  }
-
   // utilities
 
   function shortKey(key: string = '', len: number = 32): string {
@@ -160,8 +120,6 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
             <div>
               <Input
                 className='full'
-                // help={t('any message')}
-                // isError={!isNameValid}
                 label={t('message')}
                 onChange={setMessage}
                 onEnter={testSign}
@@ -183,11 +141,11 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
         </div>
       </section>
       <AccountSelector onChange={setAccountId} />
-      <section>
-        <p>AccountId: {accountId}</p>
-        <button onClick={testQuery}>FreeBalance</button>
-        <p>{queryResult}</p>
-      </section>
+      <Query
+        contractId={2}
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
+      />
       <Transfer
         accountId={accountId}
         ecdhChannel={ecdhChannel}
