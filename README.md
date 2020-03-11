@@ -10,6 +10,10 @@ A Portal into the Polkadot and Substrate networks. Provides a view and interacti
 
 This can be accessed as a hosted application via [https://polkadot.js.org/apps/](https://polkadot.js.org/apps/) to explorer any of the supported Polkadot and Substrate chains
 
+## **app-phala-m2**
+
+**Please check the [README file](packages/app-phala-m2/README.md) to learn more about Phala Network.**
+
 ## overview
 
 The repo is split into a number of packages, each representing an application. These are -
