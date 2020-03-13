@@ -2,6 +2,23 @@
 
 This is the web ui to demostrate Phala Network (pLIBRA) W3F Grant Milestone 2.
 
+## Launch
+
+### Preapare
+
+1. Make sure you have yarn installed
+2. Strart the blockchain and pRuntime. For the docker image, make sure the port 8080 is published.
+3. Change config.ts to point it to the endopoint of pRuntime.
+   - Docker default: `http://127.0.0.1:8080/tee-api/`
+   - Standalone default: `http://127.0.0.1:8000/`
+
+### Start
+
+1. Start the frontend at the root of phala-polka-apps: `yarn start`
+2. In the WebUI, change the Substrate endpoint in "Settings".
+   - Docker defulat: `ws://127.0.0.1:8080/ws`
+   - Standalone default: `ws://127.0.0.1:9944`
+
 ## Overview
 
 ```text
