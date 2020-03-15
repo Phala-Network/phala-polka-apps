@@ -8,6 +8,7 @@ import { BareProps, I18nProps } from '@polkadot/react-components/types';
 import { Balance, BlockNumber } from '@polkadot/types/interfaces';
 
 import React from 'react';
+import { Button as SButton, Icon } from 'semantic-ui-react';
 import { Bubble as PolkaBubble, IdentityIcon } from '@polkadot/react-components';
 import { useApi, useCall } from '@polkadot/react-hooks';
 import { formatBalance, formatNumber } from '@polkadot/util';
@@ -23,6 +24,7 @@ interface Props extends BareProps, I18nProps {
   pRuntimeInitalized?: boolean,
   pRuntimeBlock?: number,
   pRuntimeECDHKey?: string,
+  onChanged?: (val: string) => void;
 }
 
 const Bubble = styled(PolkaBubble)`
@@ -31,12 +33,19 @@ const Bubble = styled(PolkaBubble)`
 `;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function SummaryBar (props: Props): React.ReactElement<Props> {
+function SummaryBar (props: Props,): React.ReactElement<Props> {
   const { api, systemChain, systemName, systemVersion } = useApi();
   const bestNumber = useCall<BlockNumber>(api.derive.chain.bestNumber, []);
   const bestNumberLag = useCall<BlockNumber>(api.derive.chain.bestNumberLag, []);
   const totalInsurance = useCall<Balance>(api.query.balances.totalIssuance, []);
   const validators = useCall<DeriveStakingValidators>(api.derive.staking.validators, []);
+
+  function handleSetting() {
+    const newVal = prompt('Change pRuntime endpoint', props.pRuntimeEndpoint);
+    if (newVal && props.onChanged) {
+      props.onChanged(newVal.trim());
+    }
+  }
 
   return (
     <section className='ui--row'>
@@ -69,6 +78,9 @@ function SummaryBar (props: Props): React.ReactElement<Props> {
           </div>
           <hr/>
           <div>
+            <SButton icon onClick={handleSetting}>
+              <Icon name='setting' />
+            </SButton>
             <Bubble icon='tty' label='pRuntime'>
               {props.pRuntimeEndpoint}
             </Bubble>
