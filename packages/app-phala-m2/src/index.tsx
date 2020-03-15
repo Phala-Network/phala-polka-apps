@@ -26,23 +26,23 @@ import translate from './translate';
 import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
 import Crypto, {EcdhChannel} from './pruntime/crypto';
+import config from './config';
 
 // define our internal types
 interface Props extends AppProps, I18nProps {}
 
 function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
+  const [pRuntimeEndpoint, setPRuntimeEndpoint] = useState<string>(config.pRuntimeEndpoint);
   const [accountId, setAccountId] = useState<string | null>(null);
 
   // get_info loop
 
-  const [endpoint, setEndpoint] = useState<string>('');
   const [latency, setLatency] = useState<number | null>(null);
   const [info, setInfo] = useState<GetInfoResp | null>(null);
 
   React.useEffect(() => {
     let stop = false;
-    const API = new PRuntime();
-    setEndpoint(API.endpoint);
+    const API = new PRuntime(pRuntimeEndpoint);
     const update = async () => {
       try {
         const dt = await measure(async () => {
@@ -57,7 +57,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     };
     update();
     return () => { stop = true; console.log('stop'); }
-  }, [])
+  }, [pRuntimeEndpoint])
 
   // ecdh sign
 
@@ -77,7 +77,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   React.useEffect(() => {updateChannel()}, [info]);
 
   async function testSign() {
-    const API = new PRuntime();
+    const API = new PRuntime(pRuntimeEndpoint);
     // message
     const data = stringToU8a(message);
     const msgB64 = base64.fromByteArray(data);
@@ -106,12 +106,13 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
   return (
     <main className={className}>
       <SummaryBar
-        pRuntimeEndpoint={endpoint}
+        pRuntimeEndpoint={pRuntimeEndpoint}
         pRuntimeConnected={latency != null}
         pRuntimeLatency={latency ? latency : undefined}
         pRuntimeInitalized={info?.initialized}
         pRuntimeBlock={info?.blocknum}
         pRuntimeECDHKey={info?.ecdhPublicKey}
+        onChanged={setPRuntimeEndpoint}
       />
       <section>
         <h1>ECDH test</h1>
@@ -149,6 +150,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
         contractId={2}
         accountId={accountId}
         ecdhChannel={ecdhChannel}
+        pRuntimeEndpoint={pRuntimeEndpoint}
       />
     </main>
   );
