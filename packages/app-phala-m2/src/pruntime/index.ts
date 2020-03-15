@@ -9,7 +9,7 @@ import * as Models from './models';
 import config from '../config';
 import {u8aToHexCompact} from '../utils';
 
-const {Aead, Ecdh} = Crypto;
+const {Aead} = Crypto;
 
 // Generates a radom nonce object used in pRuntime requests
 function nonce(): object {
