@@ -17,13 +17,14 @@ interface Props {
   contractId: number;
   accountId: string | null;
   ecdhChannel: EcdhChannel | null;
+  pRuntimeEndpoint: string;
 }
 
 const QuerySection = styled.section`
   margin-bottom: 5px;
 `;
 
-export default function Query ({ contractId, accountId, ecdhChannel }: Props): React.ReactElement<Props> {
+export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint }: Props): React.ReactElement<Props> {
   const [keypair, setKeypair] = useState<KeyringPair | null>(null);
   React.useEffect(() => {
     (async () => {
@@ -55,7 +56,7 @@ export default function Query ({ contractId, accountId, ecdhChannel }: Props): R
       alert('Dest account not selected');
       return;
     }
-    const result: object = await new PRuntime().query(contractId, {
+    const result: object = await new PRuntime(pRuntimeEndpoint).query(contractId, {
       FreeBalance: {
         account: ss58ToHex(targetAccount)
       }
@@ -65,7 +66,7 @@ export default function Query ({ contractId, accountId, ecdhChannel }: Props): R
 
   async function queryTotalIssuance() {
     if (!checkChannelReady()) return;
-    const result: object = await new PRuntime().query(
+    const result: object = await new PRuntime(pRuntimeEndpoint).query(
       contractId, 'TotalIssuance', ecdhChannel!, keypair!);
     setQueryResult(result);
   }
