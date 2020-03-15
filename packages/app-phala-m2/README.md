@@ -2,6 +2,8 @@
 
 This is the web ui to demostrate Phala Network (pLIBRA) W3F Grant Milestone 2.
 
+Live version: https://webui.phala.network/
+
 ## Launch
 
 ### Preapare
