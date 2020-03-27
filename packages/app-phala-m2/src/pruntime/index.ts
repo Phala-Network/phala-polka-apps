@@ -76,7 +76,7 @@ class PRuntime {
     };
     const cipher = await encryptObj(channel, query);
     const payload = {Cipher: cipher};  // May support plain text in the future.
-    const q = signQuery(payload, keypair)
+    const q = signQuery(payload, keypair);
     const respPayload = await this.reqTyped<Models.Payload>('query', q);
     // Decode payload
     return await decodePayload<R>(channel, respPayload);
