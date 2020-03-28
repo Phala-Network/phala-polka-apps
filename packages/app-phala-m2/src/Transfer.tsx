@@ -14,40 +14,57 @@ import {ss58ToHex} from './utils';
 
 interface Props {
   accountId?: string | null;
+  assets: boolean;
+  assetId?: number;
   ecdhChannel: EcdhChannel | null;
 }
 
-const kContractId = 2;
-
-export default function Transfer ({ accountId, ecdhChannel }: Props): React.ReactElement<Props> {
+export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: Props): React.ReactElement<Props> {
   const [amount, setAmount] = useState<BN | undefined | null>(null);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [command, setCommand] = useState('');
+  const [ready, setReady] = useState(false);
+
+  // 2: Balances, 3: Assets
+  const contractId = assets ? 3 : 2;
 
   React.useEffect(() => {
-    if (!ecdhChannel || !ecdhChannel.core.remotePubkey || !recipientId || !amount) {
+    if (!ecdhChannel || !ecdhChannel.core.remotePubkey || !recipientId || !amount || (assets && assetId == undefined)) {
       console.log([ecdhChannel, recipientId, amount]);
+      setReady(false);
       return;
     }
+    setReady(true);
     console.log('dest', recipientId);
     const pubkeyHex = ss58ToHex(recipientId);
     (async () => {
-      const obj = {
-        Transfer: {
-          dest: pubkeyHex,
-          value: amount.toString()
-        }
-      };
+      let obj;
+      if (!assets) {
+        obj = {
+          Transfer: {
+            dest: pubkeyHex,
+            value: amount.toString()
+          }
+        };
+      } else {
+        obj = {
+          Transfer: {
+            id: assetId,
+            dest: pubkeyHex,
+            value: amount.toString()
+          }
+        };
+      }
       console.log('obj', obj)
       const cipher = await encryptObj(ecdhChannel, obj);
       const apiCipher = toApi(cipher);
       setCommand(JSON.stringify({Cipher: apiCipher}));
-    })()
-  }, [ecdhChannel, recipientId, amount])
+    })();
+  }, [ecdhChannel, recipientId, amount, assetId])
 
   return (
     <section>
-      <h1>transfer</h1>
+      <h2>transfer</h2>
       <div className='ui--row'>
         <div className='large'>
           <InputAddress
@@ -61,10 +78,11 @@ export default function Transfer ({ accountId, ecdhChannel }: Props): React.Reac
           />
           <Button.Group>
             <TxButton
+              isDisabled={!ready}
               accountId={accountId}
               icon='send'
               label='make transfer'
-              params={[kContractId, command]}
+              params={[contractId, command]}
               tx='execution.pushCommand'
             />
           </Button.Group>
