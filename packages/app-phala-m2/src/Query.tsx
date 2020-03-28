@@ -1,30 +1,41 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import { Button, Bubble, Balance, Card } from '@polkadot/react-components';
+import { Button, Bubble, Card } from '@polkadot/react-components';
 import { KeyringPair } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
-import BN from 'bn.js';
-
 import Summary from './Summary';
 import PRuntime from './pruntime';
 import {EcdhChannel} from './pruntime/crypto';
-import {ss58ToHex} from './utils';
+import { ButtonProps } from '@polkadot/react-components/Button/types';
 
 interface Props {
   contractId: number;
   accountId: string | null;
   ecdhChannel: EcdhChannel | null;
   pRuntimeEndpoint: string;
+  plans: QueryPlan[];
 }
 
 const QuerySection = styled.section`
   margin-bottom: 5px;
 `;
 
-export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint }: Props): React.ReactElement<Props> {
+export interface QueryPlan {
+  query: string;
+  buttons: {
+    props: ButtonProps; // extends ButtonProps
+    getPayload?: () => any;
+  }[];
+  bubble?: {
+    props: any;
+    render?: (result: any) => React.ReactNode;
+  };
+};
+
+export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, plans }: Props): React.ReactElement<Props> {
   const [keypair, setKeypair] = useState<KeyringPair | null>(null);
   React.useEffect(() => {
     (async () => {
@@ -50,74 +61,55 @@ export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEnd
     return true;
   }
 
-  async function queryFreeBalance(targetAccount: string | null) {
+  async function query(name: string, getPayload?: () => any) {
     if (!checkChannelReady()) return;
-    if (!targetAccount) {
-      alert('Dest account not selected');
-      return;
+    let data: any;
+    if (getPayload) {
+      data = {};
+      data[name] = getPayload();
+    } else {
+      data = name;
     }
-    const result: object = await new PRuntime(pRuntimeEndpoint).query(contractId, {
-      FreeBalance: {
-        account: ss58ToHex(targetAccount)
-      }
-    }, ecdhChannel!, keypair!);
+    const result: object = await new PRuntime(pRuntimeEndpoint).query(contractId, data, ecdhChannel!, keypair!);
     setQueryResult(result);
   }
 
-  async function queryTotalIssuance() {
-    if (!checkChannelReady()) return;
-    const result: object = await new PRuntime(pRuntimeEndpoint).query(
-      contractId, 'TotalIssuance', ecdhChannel!, keypair!);
-    setQueryResult(result);
+  function formatError(error: any): string {
+    if (typeof error === 'string') {
+      return error;
+    } else {
+      return JSON.stringify(error);
+    }
   }
 
   return (
     <section>
-      <h1>query</h1>
+      <h2>query</h2>
       <div className='ui--row'>
         <div className='large'>
           <QuerySection>
-            <Button
-              icon='money bill alternate outline'
-              label='TotalIssuannce'
-              isPrimary
-              onClick={() => queryTotalIssuance()}
-            />
-            <Button
-              icon='search'
-              label='FreeBalance'
-              isPrimary
-              onClick={() => queryFreeBalance(accountId)}
-            />
-            <Button
-              icon='search'
-              label='FreeBalance for Bob'
-              isNegative
-              onClick={() => queryFreeBalance('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty')}
-            />
+            {
+              plans.map(p => (
+                p.buttons.map(b =>
+                  <Button {...b.props} onClick={() => query(p.query, b.getPayload)}/>
+                )
+              )).flat()
+            }
           </QuerySection>
 
           <Card>
             <p><strong>response</strong></p>
-            { queryResult?.TotalIssuance?.totalIssuance && (
-              <Bubble color='teal' icon='money bill alternate outline' label='total issuance'>
-                <Balance
-                  balance={new BN(queryResult.TotalIssuance.totalIssuance)}
-                  params={'dummy'}
-                />
-              </Bubble>
-            )}
-            { queryResult?.FreeBalance?.balance && (
-              <Bubble color='yellow' icon='adjust' label='balance'>
-                <Balance
-                  balance={new BN(queryResult.FreeBalance.balance)}
-                  params={'dummy'}
-                />
-              </Bubble>
-            )}
+            { plans.map(p => ({p, b: p.bubble}))
+                   .filter(({p, b}) => (
+                     b && queryResult && (queryResult == p.query || queryResult[p.query])))
+                   .map(({p, b}) => (
+                     <Bubble {...b!.props}>
+                       {b!.render && b!.render(queryResult[p.query])}
+                     </Bubble>))
+            }
             { queryResult?.Error && (
               <Bubble color='red' icon='minus circle' label='error'>
-                {queryResult.Error}
+                {formatError(queryResult.Error)}
               </Bubble>
             )}
             { queryResult && (
