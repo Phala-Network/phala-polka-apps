@@ -19,7 +19,7 @@ function AccountSelector ({ className, onChange }: Props): React.ReactElement<Pr
 
   return (
     <section className={`template--AccountSelector ${className}`}>
-      <h1>select account</h1>
+      <h2>select account</h2>
       <div className='ui--row'>
         <div className='large'>
           <InputAddress
