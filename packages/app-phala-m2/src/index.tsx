@@ -21,6 +21,7 @@ import AccountSelector from './AccountSelector';
 import SummaryBar from './SummaryBar';
 import Transfer from './Transfer';
 import Query from './Query';
+import AssetsQuery from './AssetsQuery';
 import translate from './translate';
 
 import PRuntime, {measure} from './pruntime';
@@ -148,6 +149,12 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
       />
       <Query
         contractId={2}
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
+        pRuntimeEndpoint={pRuntimeEndpoint}
+      />
+      <AssetsQuery
+        contractId={3}
         accountId={accountId}
         ecdhChannel={ecdhChannel}
         pRuntimeEndpoint={pRuntimeEndpoint}
