@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
+import { Accordion, Icon } from 'semantic-ui-react'
 
 import { I18nProps } from '@polkadot/react-components/types';
-import { Bubble, Card, Dropdown } from '@polkadot/react-components';
+import { Dropdown } from '@polkadot/react-components';
 import { KeyringPair } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
@@ -55,6 +57,14 @@ function formatAssetBalance (asset: Models.AssetMetadata) {
 
 type MetadataQueryResult = {Metadata: Models.MetadataResp};
 
+const MetadataDetailContainer = styled.div`
+  margin-left: 29px;
+  margin-top: 5px;
+  pre {
+    overflow: scroll;
+  }
+`;
+
 function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, onChange, t }: Props): React.ReactElement<Props> {
   const [keypair, setKeypair] = useState<KeyringPair | null>(null);
   React.useEffect(() => {
@@ -100,6 +110,8 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
     onChange(asset);
   }
 
+  const [expand, setExpand] = useState(false);
+
   return (
     <section>
       <div className='ui--row'>
@@ -129,21 +141,21 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
             }
           />
 
-          <Card>
-            <p><strong>response</strong></p>
-            { queryResult?.Error && (
-              <Bubble color='red' icon='minus circle' label='error'>
-                {queryResult.Error}
-              </Bubble>
-            )}
-            { queryResult && (
-              <div>
-                <code>
-                  {JSON.stringify(queryResult)}
-                </code>
-              </div>
-            )}
-          </Card>
+          <MetadataDetailContainer>
+            <Accordion fluid styled className='metadata-details'>
+              <Accordion.Title
+                active={expand}
+                index={0}
+                onClick={() => setExpand(!expand)}
+              >
+                <Icon name='dropdown' />
+                Assets Metadata
+              </Accordion.Title>
+              <Accordion.Content active={expand}>
+                <pre>{JSON.stringify(queryResult, undefined, 2)}</pre>
+              </Accordion.Content>
+            </Accordion>
+          </MetadataDetailContainer>
         </div>
         <Summary className='small'>Select an asset or issue your own asset.</Summary>
       </div>
