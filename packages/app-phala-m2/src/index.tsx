@@ -8,19 +8,21 @@
 // does the translation
 import { AppProps, I18nProps } from '@polkadot/react-components/types';
 import { Input } from '@polkadot/react-components';
+import Tabs from '@polkadot/react-components/Tabs';
 import { stringToU8a } from '@polkadot/util';
 
 // external imports (including those found in the packages/*
 // of this repo)
 import React, { useState } from 'react';
+import { Route, Switch } from 'react-router';
 import styled from 'styled-components';
 import * as base64 from 'base64-js';
 
 // local imports and components
 import AccountSelector from './AccountSelector';
 import SummaryBar from './SummaryBar';
-import Transfer from './Transfer';
-import Query from './Query';
+import BalancesTab from './contracts/balances';
+import AssetsTab from './contracts/assets';
 import translate from './translate';
 
 import PRuntime, {measure} from './pruntime';
@@ -31,7 +33,7 @@ import config from './config';
 // define our internal types
 interface Props extends AppProps, I18nProps {}
 
-function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
+function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> {
   const [pRuntimeEndpoint, setPRuntimeEndpoint] = useState<string>(config.pRuntimeEndpoint);
   const [accountId, setAccountId] = useState<string | null>(null);
 
@@ -69,12 +71,13 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     setEcdhChannel(ch);
   }
   async function updateChannel() {
+    console.log('>>>> ecdhPubKey', info?.ecdhPublicKey);
     if (ecdhChannel && info && info.ecdhPublicKey) {
        setEcdhChannel(await Crypto.joinChannel(ecdhChannel, info?.ecdhPublicKey));
     }
   }
   React.useEffect(() => {newChanel()}, []);
-  React.useEffect(() => {updateChannel()}, [info]);
+  React.useEffect(() => {updateChannel()}, [info?.ecdhPublicKey]);
 
   async function testSign() {
     const API = new PRuntime(pRuntimeEndpoint);
@@ -102,7 +105,6 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
     return key.substring(0, len) + '...';
   }
 
-
   return (
     <main className={className}>
       <SummaryBar
@@ -115,7 +117,7 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
         onChanged={setPRuntimeEndpoint}
       />
       <section>
-        <h1>ECDH test</h1>
+        <h2>ECDH test</h2>
         <div className='ui--row'>
           <div className='large'>
             <div>
@@ -142,21 +144,43 @@ function TemplateApp ({ className, t }: Props): React.ReactElement<Props> {
         </div>
       </section>
       <AccountSelector onChange={setAccountId} />
-      <Transfer
-        accountId={accountId}
-        ecdhChannel={ecdhChannel}
-      />
-      <Query
-        contractId={2}
-        accountId={accountId}
-        ecdhChannel={ecdhChannel}
-        pRuntimeEndpoint={pRuntimeEndpoint}
-      />
+      <Tabs
+          basePath={basePath}
+          items={[
+            {
+              name: 'balances',
+              text: t('Balances')
+            },
+            {
+              name: 'assets',
+              text: t('Assets')
+            },
+          ]}
+        />
+      <Switch>
+        <Route path={`${basePath}/balances`}>
+          <BalancesTab
+            accountId={accountId}
+            ecdhChannel={ecdhChannel}
+            pRuntimeEndpoint={pRuntimeEndpoint}
+          />
+        </Route>
+        <Route path={`${basePath}/assets`}>
+          <AssetsTab
+            accountId={accountId}
+            ecdhChannel={ecdhChannel}
+            pRuntimeEndpoint={pRuntimeEndpoint}
+          />
+        </Route>
+        <Route>
+          <p>Please select a contract.</p>
+        </Route>
+      </Switch>
     </main>
   );
 }
 
-export default styled(translate(TemplateApp))`
+export default styled(translate(PhalaM2))`
   table td:nth-child(1) {
     text-align: right;
   }

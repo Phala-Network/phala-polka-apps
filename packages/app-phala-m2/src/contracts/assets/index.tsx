@@ -1,0 +1,106 @@
+import { Balance } from '@polkadot/react-components';
+
+import React from 'react';
+import BN from 'bn.js';
+
+import Transfer from "@polkadot/app-phala-m2/Transfer";
+import Query from "@polkadot/app-phala-m2/Query";
+import { EcdhChannel } from '@polkadot/app-phala-m2/pruntime/crypto';
+import { ss58ToHex } from '@polkadot/app-phala-m2/utils';
+
+import * as Models from './models';
+import AssetSelector from './AssetSelector';
+
+interface Props {
+  accountId: string | null;
+  ecdhChannel: EcdhChannel | null;
+  pRuntimeEndpoint: string;
+}
+
+export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint}: Props): React.ReactElement<Props> {
+  const [assetId, setAssetId] = React.useState(0);
+
+  function findAsset(result: Models.MetadataResp): Models.AssetMetadata | null {
+    return result.metadata.find(m => m.id == assetId!) || null;
+  }
+  const queryPlan = [{
+    query: 'Metadata',
+    buttons: [{
+      props: {
+        label: 'TotalSupply',
+        icon: 'money bill alternate outline',
+        isPrimary: true,
+        isNegative: false,
+      }
+    }],
+    bubble: {
+      props: {
+        label: 'total supply',
+        color: 'teal',
+        icon: 'money bill alternate outline',
+      },
+      render (result: Models.MetadataResp) {
+        return (<Balance balance={new BN(findAsset(result)!.totalSupply)} params={'dummy'} />);
+      }
+    }
+  }, {
+    query: 'Balance',
+    buttons: [{
+        props: {
+          label: 'Balance',
+          icon: 'search',
+          isPrimary: true,
+          isNegative: false,
+        },
+        getPayload(): Models.BalanceReq {
+          return { id: assetId!, account: ss58ToHex(accountId!) }
+        },
+      }, {
+        props: {
+          label: 'Balance for Bob',
+          icon: 'search',
+          isPrimary: false,
+          isNegative: true,
+        },
+        getPayload(): Models.BalanceReq {
+          return { id: assetId!, account: ss58ToHex('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty') }
+        },
+      }],
+    bubble: {
+      props: {
+        label: 'balance',
+        color: 'yellow',
+        icon: 'adjust',
+      },
+      render (result: Models.BalanceResp) {
+        return (<Balance balance={new BN(result.balance)} params={'dummy'} />);
+      }
+    }
+  }];
+
+  return (
+    <>
+      <h1>Assets</h1>
+      <AssetSelector
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
+        pRuntimeEndpoint={pRuntimeEndpoint}
+        contractId={3}
+        onChange={m => setAssetId(m.id)}
+      />
+      <Transfer
+        assets={true}
+        assetId={assetId}
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
+      />
+      <Query
+        contractId={3}
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
+        pRuntimeEndpoint={pRuntimeEndpoint}
+        plans={queryPlan}
+      />
+    </>
+  );
+}
