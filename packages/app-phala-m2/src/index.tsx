@@ -65,19 +65,23 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
 
   const [message, setMessage] = useState('');
   const [ecdhChannel, setEcdhChannel] = useState<EcdhChannel | null>(null);
+  const [ecdhShouldJoin, setEcdhShouldJoin] = useState(false);
 
   async function newChanel() {
     const ch = await Crypto.newChannel();
     setEcdhChannel(ch);
+    setEcdhShouldJoin(true);
   }
   async function updateChannel() {
-    console.log('>>>> ecdhPubKey', info?.ecdhPublicKey);
-    if (ecdhChannel && info && info.ecdhPublicKey) {
-       setEcdhChannel(await Crypto.joinChannel(ecdhChannel, info?.ecdhPublicKey));
+    if (ecdhShouldJoin && ecdhChannel && info && info.ecdhPublicKey) {
+      const ch = await Crypto.joinChannel(ecdhChannel, info?.ecdhPublicKey);
+      setEcdhShouldJoin(false);
+      setEcdhChannel(ch);
+      console.log('joined channel:', ch);
     }
   }
   React.useEffect(() => {newChanel()}, []);
-  React.useEffect(() => {updateChannel()}, [info?.ecdhPublicKey]);
+  React.useEffect(() => {updateChannel()}, [setEcdhShouldJoin, info, info?.ecdhPublicKey]);
 
   async function testSign() {
     const API = new PRuntime(pRuntimeEndpoint);
