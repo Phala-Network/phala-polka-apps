@@ -1,3 +1,3 @@
 export default {
-  pRuntimeEndpoint: 'http://127.0.0.1:8080/tee-api/',
+  pRuntimeEndpoint: 'https://poc1.phala.network/tee-api/',
 }

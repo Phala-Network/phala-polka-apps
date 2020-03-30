@@ -17,7 +17,7 @@ export default ([
       ]
     },
     i18n: {
-      defaultValue: 'Phala Demo M2'
+      defaultValue: 'Phala POC1'
     },
     icon: 'microchip',
     name: 'phala-m2'
