@@ -17,6 +17,7 @@ import translate from '../../translate';
 
 import * as Models from './models';
 import { toApi } from '@polkadot/app-phala-m2/pruntime/models';
+import { ss58ToHex } from '@polkadot/app-phala-m2/utils';
 
 interface Props extends I18nProps {
   contractId: number;
@@ -101,6 +102,16 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
   function findAsset(result: Models.MetadataResp, id: number): Models.AssetMetadata | null {
     return result.metadata.find(m => m.id == id) || null;
   }
+  function selectedAsset(): Models.AssetMetadata | null {
+    return queryResult && assetId != null && findAsset(queryResult.Metadata, assetId) || null;
+  }
+  function selectedIsMine(): boolean {
+    if (!accountId) {
+      return false;
+    }
+    const pubkey = ss58ToHex(accountId);
+    return selectedAsset()?.owner == pubkey || false;
+  }
 
   function internalOnChange(i: number | null) {
     if (i == null) {
@@ -128,6 +139,8 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
     const apiCipher = toApi(cipher);
     return JSON.stringify({Cipher: apiCipher});
   }
+
+  // Issue Dialog
 
   const [issueOpen, setIssueOpen] = useState(false);
   const [{isSymbolValid, symbol}, setSymbol] = useState({isSymbolValid: false, symbol: ''});
@@ -175,6 +188,25 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
     })();
   }, [isSymbolValid, symbol, totalSupply, ecdhChannel]);
 
+  // Destroy Dialog
+
+  const [destroyOpen, setDestroyOpen] = useState(false);
+  const [commandDestroy, setCommandDestroy] = useState('');
+  React.useEffect(() => {
+    if (assetId == null) {
+      setCommandDestroy('');
+      return;
+    }
+    (async () => {
+      const cmd = await createCommand({
+        Destroy: {
+          id: assetId
+        }
+      });
+      setCommandDestroy(cmd);
+    })();
+  }, [assetId, ecdhChannel]);
+
   return (
     <section>
       <div className='ui--row'>
@@ -198,7 +230,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
               <>
               {<label>{t('total supply')}</label>}
               {queryResult && assetId != null
-               && formatAssetBalance(findAsset(queryResult.Metadata, assetId)!)
+               && formatAssetBalance(selectedAsset()!)
                || '-'}
               </>
             }
@@ -224,8 +256,19 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
                 <Icon name='dropdown' /> Operations
               </Accordion.Title>
               <Accordion.Content active={expanded[1]}>
-                <button onClick={() => setIssueOpen(true)}>create token</button>
-                <button>delete token</button>
+                <Button
+                  icon='plus'
+                  onClick={() => setIssueOpen(true)}
+                >
+                  create token
+                </Button>
+                <Button
+                  icon='trash'
+                  onClick={() => setDestroyOpen(true)}
+                  isDisabled={!selectedIsMine()}
+                >
+                  destroy token
+                </Button>
               </Accordion.Content>
             </Accordion>
           </MetadataDetailContainer>
@@ -265,14 +308,43 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
               isDisabled={!isSymbolValid || !totalSupply || !commandIssue}
               accountId={accountId}
               icon='send'
-              label='submit'
+              label={t('Submit')}
               params={[contractId, commandIssue]}
               tx='execution.pushCommand'
               onSuccess={() => {setIssueOpen(false)}}
             />
           </Button.Group>
         </Modal.Actions>
+      </Modal>
 
+      <Modal
+        header={t('Destroy Token')}
+        open={destroyOpen}
+        size='small'
+      >
+        <Modal.Content>
+          <p>I confirm to destroy my token '{selectedAsset()?.symbol}' (asset id: {selectedAsset()?.id})</p>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button.Group>
+            <Button
+              icon='cancel'
+              isNegative
+              label={t('Cancel')}
+              onClick={() => {setDestroyOpen(false)}}
+            />
+            <Button.Or />
+            <TxButton
+              isDisabled={!commandDestroy}
+              accountId={accountId}
+              icon='send'
+              label={t('Confirm')}
+              params={[contractId, commandDestroy]}
+              tx='execution.pushCommand'
+              onSuccess={() => {setDestroyOpen(false)}}
+            />
+          </Button.Group>
+        </Modal.Actions>
       </Modal>
     </section>
   );
