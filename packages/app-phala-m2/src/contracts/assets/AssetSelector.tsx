@@ -1,20 +1,22 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Accordion, Icon } from 'semantic-ui-react'
+import BN from 'bn.js';
 
 import { I18nProps } from '@polkadot/react-components/types';
-import { Dropdown } from '@polkadot/react-components';
+import { Dropdown, Modal, InputBalance, Input, Button, TxButton } from '@polkadot/react-components';
 import { KeyringPair } from '@polkadot/keyring/types';
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { formatBalance } from '@polkadot/util';
 
 import Summary from '../../Summary';
-import PRuntime from '../../pruntime';
+import PRuntime, { encryptObj } from '../../pruntime';
 import {EcdhChannel} from '../../pruntime/crypto';
 import translate from '../../translate';
 
 import * as Models from './models';
-import { formatBalance } from '@polkadot/util';
+import { toApi } from '@polkadot/app-phala-m2/pruntime/models';
 
 interface Props extends I18nProps {
   contractId: number;
@@ -110,7 +112,68 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
     onChange(asset);
   }
 
-  const [expand, setExpand] = useState(false);
+  const [expanded, setExpanded] = useState([false, false]);
+  function toggleExpanded(i: number) {
+    const v = [...expanded];
+    v[i] = !expanded[i];
+    setExpanded(v);
+  }
+
+  async function createCommand (obj: any): Promise<string> {
+    if (!ecdhChannel) {
+      return '';
+    }
+    console.log('obj', obj)
+    const cipher = await encryptObj(ecdhChannel, obj);
+    const apiCipher = toApi(cipher);
+    return JSON.stringify({Cipher: apiCipher});
+  }
+
+  const [issueOpen, setIssueOpen] = useState(false);
+  const [{isSymbolValid, symbol}, setSymbol] = useState({isSymbolValid: false, symbol: ''});
+  const [totalSupply, setTotalSupply] = useState<BN | undefined>();
+  const [commandIssue, setCommandIssue] = useState('');
+
+  function validateSymbol (val: string) {
+    if (!val.toLowerCase().match(/^[a-z]+$/)) {
+      return 'bad-symbol';
+    }
+    if (val.length <= 2) {
+      return 'too-short';
+    }
+    if (val.length > 9) {
+      return 'too-long';
+    }
+    if (queryResult?.Metadata.metadata) {
+      const tokens = queryResult.Metadata.metadata;
+      if (tokens.find(t => t.symbol.toLowerCase() == val.toLowerCase())) {
+        return 'conflict-symbol';
+      }
+    }
+    return 'valid';
+  }
+  function _onChangeSymbol (symbol: string) {
+    symbol = symbol.trim().toUpperCase();
+    const valid = validateSymbol(symbol);
+    console.log('symbol', symbol, valid);
+    const isSymbolValid = (valid == 'valid');
+    setSymbol({isSymbolValid, symbol});
+  }
+  React.useEffect(() => {
+    if (!isSymbolValid || !totalSupply) {
+      setCommandIssue('');
+      return;
+    }
+    (async () => {
+      const cmd = await createCommand({
+        Issue: {
+          symbol,
+          total: totalSupply?.toString(),
+        }
+      });
+      setCommandIssue(cmd);
+    })();
+  }, [isSymbolValid, symbol, totalSupply, ecdhChannel]);
 
   return (
     <section>
@@ -144,21 +207,73 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
           <MetadataDetailContainer>
             <Accordion fluid styled className='metadata-details'>
               <Accordion.Title
-                active={expand}
+                active={expanded[0]}
                 index={0}
-                onClick={() => setExpand(!expand)}
+                onClick={() => toggleExpanded(0)}
               >
-                <Icon name='dropdown' />
-                Assets Metadata
+                <Icon name='dropdown' /> Assets Metadata
               </Accordion.Title>
-              <Accordion.Content active={expand}>
+              <Accordion.Content active={expanded[0]}>
                 <pre>{JSON.stringify(queryResult, undefined, 2)}</pre>
+              </Accordion.Content>
+              <Accordion.Title
+                active={expanded[1]}
+                index={1}
+                onClick={() => toggleExpanded(1)}
+              >
+                <Icon name='dropdown' /> Operations
+              </Accordion.Title>
+              <Accordion.Content active={expanded[1]}>
+                <button onClick={() => setIssueOpen(true)}>create token</button>
+                <button>delete token</button>
               </Accordion.Content>
             </Accordion>
           </MetadataDetailContainer>
         </div>
         <Summary className='small'>Select an asset or issue your own asset.</Summary>
       </div>
+
+      <Modal
+        header={t('Create Token')}
+        open={issueOpen}
+        size='small'
+      >
+        <Modal.Content>
+          <Input
+            className='full'
+            help={t('Enter the symbol of the token you will create.')}
+            isError={!isSymbolValid}
+            label={t('symbol')}
+            onChange={_onChangeSymbol}
+            value={symbol}
+          />
+          <InputBalance
+            label={t('total supply')}
+            onChange={setTotalSupply}
+          />
+        </Modal.Content>
+        <Modal.Actions>
+          <Button.Group>
+            <Button
+              icon='cancel'
+              isNegative
+              label={t('Cancel')}
+              onClick={() => {setIssueOpen(false)}}
+            />
+            <Button.Or />
+            <TxButton
+              isDisabled={!isSymbolValid || !totalSupply || !commandIssue}
+              accountId={accountId}
+              icon='send'
+              label='submit'
+              params={[contractId, commandIssue]}
+              tx='execution.pushCommand'
+              onSuccess={() => {setIssueOpen(false)}}
+            />
+          </Button.Group>
+        </Modal.Actions>
+
+      </Modal>
     </section>
   );
 }
