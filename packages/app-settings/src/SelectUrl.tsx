@@ -27,6 +27,12 @@ interface State extends StateUrl {
   isCustom: boolean;
 }
 
+uiSettings.availableNodes.unshift({
+  info: "phala-poc1",
+  text: "Phala Network testnet POC1 (hosted by Phala)",
+  value: "wss://poc1.phala.network/ws",
+});
+
 const endpointOptions = uiSettings.availableNodes.map((o): Option => createOption(o, ['local']));
 
 // check the validity of the url
