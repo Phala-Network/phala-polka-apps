@@ -33,6 +33,25 @@ import config from './config';
 // define our internal types
 interface Props extends AppProps, I18nProps {}
 
+
+
+const Banner = styled.div`
+  padding: 0 0.5rem 0.5rem;
+  margin-top: 10px;
+
+  .box {
+    background: #fff6e5;
+    border-left: 0.25rem solid darkorange;
+    border-radius: 0 0.25rem 0.25rem 0;
+    box-sizing: border-box;
+    padding: 1rem 1.5rem;
+
+    .info {
+      max-width: 50rem;
+    }
+  }
+`;
+
 function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> {
   const [pRuntimeEndpoint, setPRuntimeEndpoint] = useState<string>(config.pRuntimeEndpoint);
   const [accountId, setAccountId] = useState<string | null>(null);
@@ -111,6 +130,14 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
 
   return (
     <main className={className}>
+      <Banner>
+        <div className='box'>
+          <div className='info'>
+            <p><strong>Phala Network testnet POC1</strong></p>
+            <p>Test only. The network may be reset randomly. pRuntime is running in development mode. So currently the confidentiality is not guaranteed.</p>
+          </div>
+        </div>
+      </Banner>
       <SummaryBar
         pRuntimeEndpoint={pRuntimeEndpoint}
         pRuntimeConnected={latency != null}
