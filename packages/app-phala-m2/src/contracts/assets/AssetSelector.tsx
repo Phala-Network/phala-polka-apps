@@ -27,22 +27,7 @@ interface Props extends I18nProps {
   onChange: (asset: Models.AssetMetadata) => void;
 }
 
-const mockMetadata: Models.MetadataResp = {
-  metadata: [
-    {
-      owner: 'd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
-      totalSupply: '1024000000000000',
-      symbol: 'TTT',
-      id: 0,
-    },
-    {
-      owner: 'd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d',
-      totalSupply: '1024000000000000',
-      symbol: 'PHA',
-      id: 1,
-    },
-  ]
-};
+const mockMetadata: Models.MetadataResp = { metadata: [] };
 
 // for million, 2 * 3-grouping + comma
 const M_LENGTH = 6 + 1;
