@@ -89,9 +89,13 @@ export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEnd
         <div className='large'>
           <QuerySection>
             {
-              plans.map(p => (
-                p.buttons.map(b =>
-                  <Button {...b.props} onClick={() => query(p.query, b.getPayload)}/>
+              plans.map((p, idx1) => (
+                p.buttons.map((b, idx2) =>
+                  <Button
+                    {...b.props}
+                    onClick={() => query(p.query, b.getPayload)}
+                    key={`${idx1}-${idx2}`}
+                  />
                 )
               )).flat()
             }
@@ -102,8 +106,8 @@ export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEnd
             { plans.map(p => ({p, b: p.bubble}))
                    .filter(({p, b}) => (
                      b && queryResult && (queryResult == p.query || queryResult[p.query])))
-                   .map(({p, b}) => (
-                     <Bubble {...b!.props}>
+                   .map(({p, b}, idx) => (
+                     <Bubble {...b!.props} key={idx}>
                        {b!.render && b!.render(queryResult[p.query])}
                      </Bubble>))
             }
