@@ -179,12 +179,13 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
           basePath={basePath}
           items={[
             {
-              name: 'balances',
-              text: t('Balances')
-            },
-            {
+              isRoot: true,
               name: 'assets',
               text: t('Assets')
+            },
+            {
+              name: 'balances',
+              text: t('Balances')
             },
           ]}
         />
@@ -196,15 +197,12 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
             pRuntimeEndpoint={pRuntimeEndpoint}
           />
         </Route>
-        <Route path={`${basePath}/assets`}>
+        <Route>
           <AssetsTab
             accountId={accountId}
             ecdhChannel={ecdhChannel}
             pRuntimeEndpoint={pRuntimeEndpoint}
           />
-        </Route>
-        <Route>
-          <p>Please select a contract.</p>
         </Route>
       </Switch>
     </main>
