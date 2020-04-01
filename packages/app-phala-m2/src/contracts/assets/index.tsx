@@ -91,12 +91,6 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, ke
         onChange={m => setAssetId(m.id)}
         keypair={keypair}
       />
-      <Transfer
-        assets={true}
-        assetId={assetId}
-        accountId={accountId}
-        ecdhChannel={ecdhChannel}
-      />
       <Query
         contractId={3}
         accountId={accountId}
@@ -104,6 +98,12 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, ke
         pRuntimeEndpoint={pRuntimeEndpoint}
         plans={queryPlan}
         keypair={keypair}
+      />
+      <Transfer
+        assets={true}
+        assetId={assetId}
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
       />
     </>
   );
