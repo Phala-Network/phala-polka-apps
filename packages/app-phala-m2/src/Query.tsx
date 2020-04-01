@@ -3,8 +3,6 @@ import styled from 'styled-components';
 
 import { Button, Bubble, Card } from '@polkadot/react-components';
 import { KeyringPair } from '@polkadot/keyring/types';
-import keyring from '@polkadot/ui-keyring';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import Summary from './Summary';
 import PRuntime from './pruntime';
@@ -17,6 +15,7 @@ interface Props {
   ecdhChannel: EcdhChannel | null;
   pRuntimeEndpoint: string;
   plans: QueryPlan[];
+  keypair: KeyringPair | null;
 }
 
 const QuerySection = styled.section`
@@ -35,22 +34,11 @@ export interface QueryPlan {
   };
 };
 
-export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, plans }: Props): React.ReactElement<Props> {
-  const [keypair, setKeypair] = useState<KeyringPair | null>(null);
-  React.useEffect(() => {
-    (async () => {
-      await cryptoWaitReady();
-      if (accountId) {
-        const pair = keyring.getPair(accountId || '');
-        setKeypair(pair);
-      }
-    })();
-  }, [accountId]);
-
+export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, plans, keypair }: Props): React.ReactElement<Props> {
   const [queryResult, setQueryResult] = useState<any | null>(null);
 
   function checkChannelReady(): boolean {
-    if (!keypair) {
+    if (!keypair || keypair.isLocked) {
       alert('Account not ready');
       return false;
     }

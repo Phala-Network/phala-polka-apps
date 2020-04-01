@@ -1,4 +1,5 @@
 import { Balance } from '@polkadot/react-components';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 import React from 'react';
 import BN from 'bn.js';
@@ -12,9 +13,10 @@ interface Props {
   accountId: string | null;
   ecdhChannel: EcdhChannel | null;
   pRuntimeEndpoint: string;
+  keypair: KeyringPair | null;
 }
 
-export default function BalancesTab ({accountId, ecdhChannel, pRuntimeEndpoint}: Props): React.ReactElement<Props> {
+export default function BalancesTab ({accountId, ecdhChannel, pRuntimeEndpoint, keypair}: Props): React.ReactElement<Props> {
   const queryPlan = [{
     query: 'TotalIssuance',
     buttons: [{
@@ -84,6 +86,7 @@ export default function BalancesTab ({accountId, ecdhChannel, pRuntimeEndpoint}:
         ecdhChannel={ecdhChannel}
         pRuntimeEndpoint={pRuntimeEndpoint}
         plans={queryPlan}
+        keypair={keypair}
       />
     </>
   );
