@@ -1,4 +1,5 @@
 import { Balance } from '@polkadot/react-components';
+import { KeyringPair } from '@polkadot/keyring/types';
 
 import React from 'react';
 import BN from 'bn.js';
@@ -15,9 +16,10 @@ interface Props {
   accountId: string | null;
   ecdhChannel: EcdhChannel | null;
   pRuntimeEndpoint: string;
+  keypair: KeyringPair | null;
 }
 
-export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint}: Props): React.ReactElement<Props> {
+export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, keypair}: Props): React.ReactElement<Props> {
   const [assetId, setAssetId] = React.useState(0);
 
   function findAsset(result: Models.MetadataResp): Models.AssetMetadata | null {
@@ -87,6 +89,7 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint}: P
         pRuntimeEndpoint={pRuntimeEndpoint}
         contractId={3}
         onChange={m => setAssetId(m.id)}
+        keypair={keypair}
       />
       <Transfer
         assets={true}
@@ -100,6 +103,7 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint}: P
         ecdhChannel={ecdhChannel}
         pRuntimeEndpoint={pRuntimeEndpoint}
         plans={queryPlan}
+        keypair={keypair}
       />
     </>
   );

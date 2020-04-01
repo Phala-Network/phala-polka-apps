@@ -7,9 +7,14 @@
 // `t` is inject into props (see the HOC export) and `t('any text')
 // does the translation
 import { AppProps, I18nProps } from '@polkadot/react-components/types';
-import { Input } from '@polkadot/react-components';
+import { Input, Button } from '@polkadot/react-components';
 import Tabs from '@polkadot/react-components/Tabs';
 import { stringToU8a } from '@polkadot/util';
+import keyring from '@polkadot/ui-keyring';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { KeyringPair } from '@polkadot/keyring/types';
+
+import Unlock from '@polkadot/app-toolbox/Unlock';
 
 // external imports (including those found in the packages/*
 // of this repo)
@@ -52,6 +57,15 @@ const Banner = styled.div`
   }
 `;
 
+const UnlockPrompt = styled.section`
+  div.large {
+    background: #e8e8e8;
+    .button-group {
+      margin: 20px 0;
+    }
+  }
+`;
+
 function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> {
   const [pRuntimeEndpoint, setPRuntimeEndpoint] = useState<string>(config.pRuntimeEndpoint);
   const [accountId, setAccountId] = useState<string | null>(null);
@@ -71,7 +85,7 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
           setInfo(info);
         });
         setLatency(l => l ? l * 0.8 + dt * 0.2 : dt);
-      } catch (err) { console.debug(err) }
+      } catch (err) {  }
       if (!stop) {
         setTimeout(update, 1000);
       }
@@ -79,6 +93,27 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
     update();
     return () => { stop = true; console.log('stop'); }
   }, [pRuntimeEndpoint])
+
+  // polkadot keypair
+
+  const [keypair, setKeypair] = useState<KeyringPair | null>(null);
+  React.useEffect(() => {
+    (async () => {
+      await cryptoWaitReady();
+      if (accountId) {
+        const pair = keyring.getPair(accountId || '');
+        setKeypair(pair);
+      }
+    })();
+  }, [accountId]);
+  const [showUnlock, setShowUnlock] = useState(false);
+  function _toggleUnlock () {
+    setShowUnlock(!showUnlock);
+  }
+  function _onUnlock () {
+    _toggleUnlock();
+    setKeypair(keypair);  // re-notify the locking change
+  }
 
   // ecdh sign
 
@@ -175,36 +210,63 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
         </div>
       </section>
       <AccountSelector onChange={setAccountId} />
-      <Tabs
-          basePath={basePath}
-          items={[
-            {
-              isRoot: true,
-              name: 'assets',
-              text: t('Assets')
-            },
-            {
-              name: 'balances',
-              text: t('Balances')
-            },
-          ]}
+      {keypair && keypair.isLocked &&
+        <UnlockPrompt className='ui--row'>
+          <div className='large'>
+            <Button.Group isCentered className='button-group'>
+              <Button
+                isPrimary
+                onClick={_toggleUnlock}
+                label={t('Unlock account')}
+                icon='unlock'
+              />
+            </Button.Group>
+          </div>
+        </UnlockPrompt>
+      }
+      {keypair && !keypair.isLocked &&
+      <>
+        <Tabs
+            basePath={basePath}
+            items={[
+              {
+                isRoot: true,
+                name: 'assets',
+                text: t('Assets')
+              },
+              {
+                name: 'balances',
+                text: t('Balances')
+              },
+            ]}
+          />
+        <Switch>
+          <Route path={`${basePath}/balances`}>
+            <BalancesTab
+              accountId={accountId}
+              ecdhChannel={ecdhChannel}
+              pRuntimeEndpoint={pRuntimeEndpoint}
+              keypair={keypair}
+            />
+          </Route>
+          <Route>
+            <AssetsTab
+              accountId={accountId}
+              ecdhChannel={ecdhChannel}
+              pRuntimeEndpoint={pRuntimeEndpoint}
+              keypair={keypair}
+            />
+          </Route>
+        </Switch>
+      </>}
+
+      {showUnlock && (
+        <Unlock
+          onClose={_toggleUnlock}
+          onUnlock={_onUnlock}
+          pair={keypair}
         />
-      <Switch>
-        <Route path={`${basePath}/balances`}>
-          <BalancesTab
-            accountId={accountId}
-            ecdhChannel={ecdhChannel}
-            pRuntimeEndpoint={pRuntimeEndpoint}
-          />
-        </Route>
-        <Route>
-          <AssetsTab
-            accountId={accountId}
-            ecdhChannel={ecdhChannel}
-            pRuntimeEndpoint={pRuntimeEndpoint}
-          />
-        </Route>
-      </Switch>
+      )}
     </main>
   );
 }
