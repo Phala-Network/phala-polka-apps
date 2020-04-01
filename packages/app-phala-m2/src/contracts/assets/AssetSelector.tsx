@@ -6,8 +6,6 @@ import BN from 'bn.js';
 import { I18nProps } from '@polkadot/react-components/types';
 import { Dropdown, Modal, InputBalance, Input, Button, TxButton } from '@polkadot/react-components';
 import { KeyringPair } from '@polkadot/keyring/types';
-import keyring from '@polkadot/ui-keyring';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { formatBalance } from '@polkadot/util';
 
 import Summary from '../../Summary';
@@ -25,6 +23,7 @@ interface Props extends I18nProps {
   ecdhChannel: EcdhChannel | null;
   pRuntimeEndpoint: string;
   onChange: (asset: Models.AssetMetadata) => void;
+  keypair: KeyringPair | null;
 }
 
 const mockMetadata: Models.MetadataResp = { metadata: [] };
@@ -53,17 +52,7 @@ const MetadataDetailContainer = styled.div`
   }
 `;
 
-function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, onChange, t }: Props): React.ReactElement<Props> {
-  const [keypair, setKeypair] = useState<KeyringPair | null>(null);
-  React.useEffect(() => {
-    (async () => {
-      await cryptoWaitReady();
-      if (accountId) {
-        const pair = keyring.getPair(accountId || '');
-        setKeypair(pair);
-      }
-    })();
-  }, [accountId]);
+function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, onChange, keypair, t }: Props): React.ReactElement<Props> {
 
   const [queryResult, setQueryResult] = useState<MetadataQueryResult | null>({
     Metadata: mockMetadata
@@ -76,7 +65,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
   }
 
   React.useEffect(() => {
-    if (!keypair || !ecdhChannel || !ecdhChannel.core.agreedSecret || !ecdhChannel.core.remotePubkey) {
+    if (!keypair || keypair.isLocked || !ecdhChannel || !ecdhChannel.core.agreedSecret || !ecdhChannel.core.remotePubkey) {
       return;
     }
     queryMetadata();
