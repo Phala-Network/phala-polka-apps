@@ -49,6 +49,7 @@ const MetadataDetailContainer = styled.div`
   margin-top: 5px;
   pre {
     overflow: scroll;
+    max-height: 200px;
   }
 `;
 
