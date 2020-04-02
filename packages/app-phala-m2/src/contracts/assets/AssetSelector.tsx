@@ -44,6 +44,11 @@ function formatAssetBalance (asset: Models.AssetMetadata) {
 
 type MetadataQueryResult = {Metadata: Models.MetadataResp};
 
+interface AssetOption {
+  text: string;
+  value: number;
+}
+
 const MetadataDetailContainer = styled.div`
   margin-left: 29px;
   margin-top: 5px;
@@ -182,6 +187,13 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
     })();
   }, [assetId, ecdhChannel]);
 
+  function onSearch(data: AssetOption[], query: string): AssetOption[] {
+    const lowerQuery = query.toLowerCase();
+    return data.filter((data: AssetOption): boolean =>
+      data.text.toLowerCase().indexOf(lowerQuery) >= 0
+    );
+  }
+
   return (
     <section>
       <div className='ui--row'>
@@ -193,11 +205,12 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
             isDisabled={!(queryResult?.Metadata?.metadata)}
             label={t('Select asset')}
             options={
-              queryResult?.Metadata?.metadata.map((a: Models.AssetMetadata) => ({
+              queryResult?.Metadata?.metadata.map((a: Models.AssetMetadata): AssetOption[] => ({
                 text: a.symbol,
                 value: a.id
               })) || []
             }
+            onSearch={onSearch}
             onChange={internalOnChange}
             value={assetId}
 
