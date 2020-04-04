@@ -6,7 +6,6 @@ export async function dumpKeyData(key: CryptoKey): Promise<ArrayBuffer> {
   if (key.type == 'public' || key.type == 'secret') {
     return await crypto.subtle.exportKey('raw', key);
   } else if (key.type == 'private') {
-    // dump pkcs8
     return await crypto.subtle.exportKey('pkcs8', key);
   } else {
     throw new Error('Unsupported key type');
@@ -14,8 +13,13 @@ export async function dumpKeyData(key: CryptoKey): Promise<ArrayBuffer> {
 }
 
 export async function dumpKeyString(key: CryptoKey): Promise<string> {
-  let data = await dumpKeyData(key);
-  return u8aToHexCompact(new Uint8Array(data));
+  try { 
+    let data = await dumpKeyData(key);
+    return u8aToHexCompact(new Uint8Array(data));
+  } catch (err) {
+    // Firefox apparently doesn't like to export pkcs8 for ecdh privkey
+    return '#ERR:' + err.message;
+  }
 }
 
 interface EcdhChannelCore {
