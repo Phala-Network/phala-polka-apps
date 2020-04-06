@@ -9,7 +9,8 @@ import { Balance, BlockNumber } from '@polkadot/types/interfaces';
 
 import React from 'react';
 import { Button as SButton, Icon } from 'semantic-ui-react';
-import { Bubble as PolkaBubble, IdentityIcon } from '@polkadot/react-components';
+import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
+import { IdentityIcon, Table } from '@polkadot/react-components';
 import { useApi, useCall } from '@polkadot/react-hooks';
 import { formatBalance, formatNumber } from '@polkadot/util';
 
@@ -27,9 +28,30 @@ interface Props extends BareProps, I18nProps {
   onChanged?: (val: string) => void;
 }
 
-const Bubble = styled(PolkaBubble)`
-  margin-top: 2px !important;
-  margin-bottom: 2px !important;
+interface EntryProps {
+  icon: SemanticICONS;
+  label: string;
+  children?: React.ReactNode;
+}
+function Entry ({icon, label, children}: EntryProps): React.ReactElement<EntryProps> {
+  return (
+    <tr>
+      <td><Icon name={icon} /> {label}</td>
+      <td>{children}</td>
+    </tr>
+  );
+}
+const ParamsTable = styled(Table)`
+  width: 100%;
+  td .icon {
+    margin-right: 10px;
+  }
+  td:nth-child(2) {
+    text-align: right;
+  }
+  td .button {
+    margin-left: 10px;
+  }
 `;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -50,57 +72,62 @@ function SummaryBar (props: Props,): React.ReactElement<Props> {
   return (
     <section className='ui--row'>
       <div className='large'>
-        <h1>summary</h1>
+        <h2>advanced</h2>
         <summary>
-          <div>
-            <Bubble icon='tty' label='node'>
-              {systemName} v{systemVersion}
-            </Bubble>
-            <Bubble icon='chain' label='chain'>
-              {systemChain}
-            </Bubble>
-            <Bubble icon='code' label='runtime'>
-              {api.runtimeVersion.implName} v{api.runtimeVersion.implVersion.toString(10)}
-            </Bubble>
-            <Bubble icon='bullseye' label='best #'>
-              {formatNumber(bestNumber)} ({formatNumber(bestNumberLag)} lag)
-            </Bubble>
-            {validators && (
-              <Bubble icon='chess queen' label='validators'>{
-                validators.validators.map((accountId, index): React.ReactNode => (
-                  <IdentityIcon key={index} value={accountId} size={20} />
-                ))
-              }</Bubble>
-            )}
-            <Bubble icon='circle' label='total tokens'>
-              {formatBalance(totalInsurance)}
-            </Bubble>
-          </div>
-          <hr/>
-          <div>
-            <SButton icon onClick={handleSetting}>
-              <Icon name='setting' />
-            </SButton>
-            <Bubble icon='tty' label='pRuntime'>
+          <h5>Substrate</h5>
+          <ParamsTable>
+            <Table.Body>
+              <Entry icon='tty' label='node'>
+                {systemName} v{systemVersion}
+              </Entry>
+              <Entry icon='chain' label='chain'>
+                {systemChain}
+              </Entry>
+              <Entry icon='code' label='runtime'>
+                {api.runtimeVersion.implName} v{api.runtimeVersion.implVersion.toString(10)}
+              </Entry>
+              <Entry icon='bullseye' label='best #'>
+                {formatNumber(bestNumber)} ({formatNumber(bestNumberLag)} lag)
+              </Entry>
+              {validators && (
+                <Entry icon='chess queen' label='validators'>{
+                  validators.validators.map((accountId, index): React.ReactNode => (
+                    <IdentityIcon key={index} value={accountId} size={20} />
+                  ))
+                }</Entry>
+              )}
+              <Entry icon='circle' label='total tokens'>
+                {formatBalance(totalInsurance)}
+              </Entry>
+            </Table.Body>
+          </ParamsTable>
+          <h5>pRuntime</h5>
+          <ParamsTable>
+            <Table.Body>
+            <Entry icon='tty' label='pRuntime'>
               {props.pRuntimeEndpoint}
-            </Bubble>
-            <Bubble icon='signal' label='connected'>
+              <SButton icon size='tiny' onClick={handleSetting}>
+                <Icon name='setting' />
+              </SButton>
+            </Entry>
+            <Entry icon='signal' label='connected'>
               {props.pRuntimeConnected ? `(${Math.round(props.pRuntimeLatency!)}ms)` : 'no'}
-            </Bubble>
+            </Entry>
             {props.pRuntimeConnected && (
               <>
-                <Bubble icon='check circle' label='initlized'>
+                <Entry icon='check circle' label='initlized'>
                   {props.pRuntimeInitalized ? 'yes' : 'no'}
-                </Bubble>
-                <Bubble icon='bullseye' label='synced'>
+                </Entry>
+                <Entry icon='bullseye' label='synced'>
                   {props.pRuntimeBlock}
-                </Bubble>
-                <Bubble icon='key' label='ECDH key'>
-                  {props.pRuntimeECDHKey?.substring(0, 8) + '...'}
-                </Bubble>
+                </Entry>
+                <Entry icon='key' label='ECDH key'>
+                  {props.pRuntimeECDHKey?.substring(0, 32) + '...'}
+                </Entry>
               </>
             )}
-          </div>
+            </Table.Body>
+          </ParamsTable>
         </summary>
       </div>
     </section>
