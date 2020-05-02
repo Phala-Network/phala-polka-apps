@@ -3120,9 +3120,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/app-phala-m2@workspace:packages/app-phala-m2":
+"@polkadot/app-phala-poc2@workspace:packages/page-phala-poc2":
   version: 0.0.0-use.local
-  resolution: "@polkadot/app-phala-m2@workspace:packages/app-phala-m2"
+  resolution: "@polkadot/app-phala-poc2@workspace:packages/page-phala-poc2"
   dependencies:
     "@babel/runtime": ^7.9.6
     "@polkadot/react-components": ^0.42.0-beta.73

@@ -11,11 +11,11 @@ import { formatBalance } from '@polkadot/util';
 import Summary from '../../Summary';
 import PRuntime, { encryptObj } from '../../pruntime';
 import {EcdhChannel} from '../../pruntime/crypto';
-import { useTranslation } from './../../translate';
+import { useTranslation } from '../../translate';
 
 import * as Models from './models';
-import { toApi } from '@polkadot/app-phala-m2/pruntime/models';
-import { ss58ToHex } from '@polkadot/app-phala-m2/utils';
+import { toApi } from '@polkadot/app-phala-poc2/pruntime/models';
+import { ss58ToHex } from '@polkadot/app-phala-poc2/utils';
 
 interface Props extends BareProps {
   contractId: number;

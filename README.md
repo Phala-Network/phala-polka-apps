@@ -12,9 +12,9 @@ If you run one or more IPFS node(s), pinning the UI (which only getes updated on
 
 **Important** If you are a chain developer and would like to add support for your chain to the UI, all the local configuration (API types, settings, logos) can be customized in [the apps-config package](packages/apps-config#README.md), complete with instructions of what goes where.
 
-## **app-phala-m2**
+## **page-phala-poc2**
 
-**Please check the [README file](packages/app-phala-m2/README.md) to learn more about Phala Network.**
+**Please check the [README file](packages/page-phala-poc2/README.md) to learn more about Phala Network.**
 
 A precompiled WebUI is published at [https://webui.phala.network/](https://webui.phala.network/).
 
