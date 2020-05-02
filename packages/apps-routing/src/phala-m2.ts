@@ -2,12 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Routes } from './types';
+import { Route } from './types';
 
 import PhalaM2 from '@polkadot/app-phala-m2';
 
-export default ([
-  {
+export default function create (t: (key: string, text: string, options: { ns: string }) => string): Route {
+  return {
     Component: PhalaM2,
     display: {
       isHidden: false,
@@ -16,10 +16,8 @@ export default ([
         'tx.balances.transfer'
       ]
     },
-    i18n: {
-      defaultValue: 'Phala POC1'
-    },
-    icon: 'microchip',
-    name: 'phala-m2'
-  }
-] as Routes);
+    icon: 'th',
+    name: 'phala-m2',
+    text: t('nav.phala-poc2', 'Phala POC2', { ns: 'apps-routing' })
+  };
+}

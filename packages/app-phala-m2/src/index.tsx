@@ -6,7 +6,7 @@
 // translatable strings. Generally the latter is quite "light",
 // `t` is inject into props (see the HOC export) and `t('any text')
 // does the translation
-import { AppProps, I18nProps } from '@polkadot/react-components/types';
+import { AppProps } from '@polkadot/react-components/types';
 import Tabs from '@polkadot/react-components/Tabs';
 import { KeyringPair } from '@polkadot/keyring/types';
 
@@ -20,14 +20,14 @@ import styled from 'styled-components';
 import BalancesTab from './contracts/balances';
 import AssetsTab from './contracts/assets';
 import SettingsTab from './SettingsTab';
-import translate from './translate';
+import { useTranslation } from './translate';
 
 import PRuntime, {measure} from './pruntime';
 import {GetInfoResp} from './pruntime/models';
 import Crypto, {EcdhChannel} from './pruntime/crypto';
 import config from './config';
 
-interface Props extends AppProps, I18nProps {}
+interface Props extends AppProps {}
 
 const Banner = styled.div`
   padding: 0 0.5rem 0.5rem;
@@ -48,7 +48,8 @@ const Banner = styled.div`
 `;
 
 
-function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> {
+function PhalaM2 ({ className, basePath }: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
   const [pRuntimeEndpoint, setPRuntimeEndpoint] = useState<string>(config.pRuntimeEndpoint);
   const [accountId, setAccountId] = useState<string | null>(null);
   const [keypair, setKeypair] = useState<KeyringPair | null>(null);
@@ -64,8 +65,12 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
     const update = async () => {
       try {
         const dt = await measure(async () => {
-          const info = await API.getInfo();
-          setInfo(info);
+          try {
+            const info = await API.getInfo();
+            setInfo(info);
+          } catch (err) {
+            console.warn('Error getting /info', err);
+          }
         });
         setLatency(l => l ? l * 0.8 + dt * 0.2 : dt);
       } catch (err) {  }
@@ -161,4 +166,4 @@ function PhalaM2 ({ className, t, basePath }: Props): React.ReactElement<Props> 
   );
 }
 
-export default translate(PhalaM2);
+export default PhalaM2;

@@ -4,7 +4,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { DeriveStakingValidators } from '@polkadot/api-derive/types';
-import { BareProps, I18nProps } from '@polkadot/react-components/types';
+import { BareProps } from '@polkadot/react-components/types';
 import { Balance, BlockNumber } from '@polkadot/types/interfaces';
 
 import React from 'react';
@@ -16,9 +16,8 @@ import { formatBalance, formatNumber } from '@polkadot/util';
 
 import styled from 'styled-components';
 
-import translate from './translate';
 
-interface Props extends BareProps, I18nProps {
+interface Props extends BareProps {
   pRuntimeEndpoint?: string,
   pRuntimeConnected?: boolean,
   pRuntimeLatency?: number,
@@ -60,7 +59,7 @@ function SummaryBar (props: Props,): React.ReactElement<Props> {
   const bestNumber = useCall<BlockNumber>(api.derive.chain.bestNumber, []);
   const bestNumberLag = useCall<BlockNumber>(api.derive.chain.bestNumberLag, []);
   const totalInsurance = useCall<Balance>(api.query.balances.totalIssuance, []);
-  const validators = useCall<DeriveStakingValidators>(api.derive.staking.validators, []);
+  const validators = useCall<DeriveStakingValidators>(api.derive.staking?.validators, []);
 
   function handleSetting() {
     const newVal = prompt('Change pRuntime endpoint', props.pRuntimeEndpoint);
@@ -75,35 +74,33 @@ function SummaryBar (props: Props,): React.ReactElement<Props> {
         <h2>advanced</h2>
         <summary>
           <h5>Substrate</h5>
-          <ParamsTable>
-            <Table.Body>
-              <Entry icon='tty' label='node'>
-                {systemName} v{systemVersion}
-              </Entry>
-              <Entry icon='chain' label='chain'>
-                {systemChain}
-              </Entry>
-              <Entry icon='code' label='runtime'>
-                {api.runtimeVersion.implName} v{api.runtimeVersion.implVersion.toString(10)}
-              </Entry>
-              <Entry icon='bullseye' label='best #'>
-                {formatNumber(bestNumber)} ({formatNumber(bestNumberLag)} lag)
-              </Entry>
-              {validators && (
-                <Entry icon='chess queen' label='validators'>{
-                  validators.validators.map((accountId, index): React.ReactNode => (
-                    <IdentityIcon key={index} value={accountId} size={20} />
-                  ))
-                }</Entry>
-              )}
-              <Entry icon='circle' label='total tokens'>
-                {formatBalance(totalInsurance)}
-              </Entry>
-            </Table.Body>
+          <ParamsTable header={[]}>
+            <Entry icon='tty' label='node'>
+              {systemName} v{systemVersion}
+            </Entry>
+            <Entry icon='chain' label='chain'>
+              {systemChain}
+            </Entry>
+            <Entry icon='code' label='runtime'>
+              {api.runtimeVersion.implName} v{api.runtimeVersion.implVersion.toString(10)}
+            </Entry>
+            <Entry icon='bullseye' label='best #'>
+              {formatNumber(bestNumber)} ({formatNumber(bestNumberLag)} lag)
+            </Entry>
+            {JSON.stringify(validators)}
+            {/* {validators && (xxx
+              <Entry icon='chess queen' label='validators'>{
+                validators.validators.map((accountId, index): React.ReactNode => (
+                  <IdentityIcon key={index} size={20} value={accountId} />
+                ))
+              }</Entry>
+            )} */}
+            <Entry icon='circle' label='total tokens'>
+              {formatBalance(totalInsurance)}
+            </Entry>
           </ParamsTable>
           <h5>pRuntime</h5>
-          <ParamsTable>
-            <Table.Body>
+          <ParamsTable header={[]}>
             <Entry icon='tty' label='pRuntime'>
               {props.pRuntimeEndpoint}
               <SButton icon size='tiny' onClick={handleSetting}>
@@ -126,7 +123,6 @@ function SummaryBar (props: Props,): React.ReactElement<Props> {
                 </Entry>
               </>
             )}
-            </Table.Body>
           </ParamsTable>
         </summary>
       </div>
@@ -135,4 +131,4 @@ function SummaryBar (props: Props,): React.ReactElement<Props> {
 }
 
 // inject the actual API calls automatically into props
-export default translate(SummaryBar);
+export default SummaryBar;

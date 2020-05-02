@@ -3,7 +3,7 @@ import * as base64 from 'base64-js';
 import styled from 'styled-components';
 
 import { Button, Input } from '@polkadot/react-components';
-import { I18nProps } from '@polkadot/react-components/types';
+import { BareProps } from '@polkadot/react-components/types';
 import Unlock from '@polkadot/app-toolbox/Unlock';
 
 import { stringToU8a } from '@polkadot/util';
@@ -14,11 +14,11 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 import { GetInfoResp } from './pruntime/models';
 import AccountSelector from './AccountSelector';
 import SummaryBar from './SummaryBar';
-import translate from './translate';
+import { useTranslation } from './translate';
 import PRuntime from './pruntime';
 import { EcdhChannel } from './pruntime/crypto';
 
-interface Props extends I18nProps {
+interface Props extends BareProps {
   ecdhChannel: EcdhChannel | null;
   info: GetInfoResp | null;
   latency: number;
@@ -50,7 +50,8 @@ const UnlockPrompt = styled.section`
 function Settings(props: Props): React.ReactElement<Props> {
   const {
     ecdhChannel, info, latency, pRuntimeEndpoint,
-    setPRuntimeEndpoint, setAccountId, setKeypair, t } = props;
+    setPRuntimeEndpoint, setAccountId, setKeypair } = props;
+  const { t } = useTranslation();
   const [accountId, setAccountIdInternal] = React.useState<string | null>(null);
   function _setAccountId (val: string | null) {
     setAccountIdInternal(val);
@@ -177,4 +178,4 @@ function Settings(props: Props): React.ReactElement<Props> {
   );
 }
 
-export default translate(Settings);
+export default Settings;
