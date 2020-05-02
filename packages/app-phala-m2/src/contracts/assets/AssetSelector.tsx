@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Accordion, Icon } from 'semantic-ui-react'
 import BN from 'bn.js';
 
-import { I18nProps } from '@polkadot/react-components/types';
+import { BareProps } from '@polkadot/react-components/types';
 import { Dropdown, Modal, InputBalance, Input, Button, TxButton } from '@polkadot/react-components';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { formatBalance } from '@polkadot/util';
@@ -11,13 +11,13 @@ import { formatBalance } from '@polkadot/util';
 import Summary from '../../Summary';
 import PRuntime, { encryptObj } from '../../pruntime';
 import {EcdhChannel} from '../../pruntime/crypto';
-import translate from '../../translate';
+import { useTranslation } from './../../translate';
 
 import * as Models from './models';
 import { toApi } from '@polkadot/app-phala-m2/pruntime/models';
 import { ss58ToHex } from '@polkadot/app-phala-m2/utils';
 
-interface Props extends I18nProps {
+interface Props extends BareProps {
   contractId: number;
   accountId: string | null;
   ecdhChannel: EcdhChannel | null;
@@ -58,7 +58,8 @@ const MetadataDetailContainer = styled.div`
   }
 `;
 
-function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, onChange, keypair, t }: Props): React.ReactElement<Props> {
+function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, onChange, keypair}: Props): React.ReactElement<Props> {
+  const { t } = useTranslation();
 
   const [queryResult, setQueryResult] = useState<MetadataQueryResult | null>({
     Metadata: mockMetadata
@@ -205,7 +206,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
             isDisabled={!(queryResult?.Metadata?.metadata)}
             label={t('Select asset')}
             options={
-              queryResult?.Metadata?.metadata.map((a: Models.AssetMetadata): AssetOption[] => ({
+              queryResult?.Metadata?.metadata.map((a: Models.AssetMetadata): AssetOption => ({
                 text: a.symbol,
                 value: a.id
               })) || []
@@ -283,7 +284,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
             onChange={setTotalSupply}
           />
         </Modal.Content>
-        <Modal.Actions>
+        <Modal.Actions onCancel={() => {setIssueOpen(false)}}>
           <Button.Group>
             <Button
               icon='cancel'
@@ -313,7 +314,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
         <Modal.Content>
           <p>I confirm to destroy my token '{selectedAsset()?.symbol}' (asset id: {selectedAsset()?.id})</p>
         </Modal.Content>
-        <Modal.Actions>
+        <Modal.Actions onCancel={() => {setDestroyOpen(false)}}>
           <Button.Group>
             <Button
               icon='cancel'
@@ -338,4 +339,4 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
   );
 }
 
-export default translate(AssetSelector);
+export default AssetSelector;
