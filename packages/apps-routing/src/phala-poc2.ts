@@ -4,11 +4,11 @@
 
 import { Route } from './types';
 
-import PhalaM2 from '@polkadot/app-phala-m2';
+import PhalaPoc2 from '@polkadot/app-phala-poc2';
 
 export default function create (t: (key: string, text: string, options: { ns: string }) => string): Route {
   return {
-    Component: PhalaM2,
+    Component: PhalaPoc2,
     display: {
       isHidden: false,
       needsAccounts: true,
@@ -16,8 +16,8 @@ export default function create (t: (key: string, text: string, options: { ns: st
         'tx.balances.transfer'
       ]
     },
-    icon: 'th',
-    name: 'phala-m2',
+    icon: 'microchip',
+    name: 'phala-poc2',
     text: t('nav.phala-poc2', 'Phala POC2', { ns: 'apps-routing' })
   };
 }
