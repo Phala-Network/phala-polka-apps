@@ -10,7 +10,7 @@ import { Balance, BlockNumber } from '@polkadot/types/interfaces';
 import React from 'react';
 import { Button as SButton, Icon } from 'semantic-ui-react';
 import { SemanticICONS } from 'semantic-ui-react/dist/commonjs/generic';
-import { IdentityIcon, Table } from '@polkadot/react-components';
+import { IdentityIcon as _IdentityIcon, Table } from '@polkadot/react-components';
 import { useApi, useCall } from '@polkadot/react-hooks';
 import { formatBalance, formatNumber } from '@polkadot/util';
 
@@ -53,6 +53,10 @@ const ParamsTable = styled(Table)`
   }
 `;
 
+const IdentityIcon = styled(_IdentityIcon)`
+  display: inline-block;
+`;
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function SummaryBar (props: Props,): React.ReactElement<Props> {
   const { api, systemChain, systemName, systemVersion } = useApi();
@@ -87,14 +91,13 @@ function SummaryBar (props: Props,): React.ReactElement<Props> {
             <Entry icon='bullseye' label='best #'>
               {formatNumber(bestNumber)} ({formatNumber(bestNumberLag)} lag)
             </Entry>
-            {JSON.stringify(validators)}
-            {/* {validators && (xxx
+            {validators && (
               <Entry icon='chess queen' label='validators'>{
                 validators.validators.map((accountId, index): React.ReactNode => (
                   <IdentityIcon key={index} size={20} value={accountId} />
                 ))
               }</Entry>
-            )} */}
+            )}
             <Entry icon='circle' label='total tokens'>
               {formatBalance(totalInsurance)}
             </Entry>
