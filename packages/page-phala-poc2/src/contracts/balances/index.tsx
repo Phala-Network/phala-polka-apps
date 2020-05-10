@@ -4,10 +4,10 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import React from 'react';
 import BN from 'bn.js';
 
-import Transfer from "@polkadot/app-phala-poc2/Transfer";
-import Query from "@polkadot/app-phala-poc2/Query";
-import { EcdhChannel } from '@polkadot/app-phala-poc2/pruntime/crypto';
-import { ss58ToHex } from '@polkadot/app-phala-poc2/utils';
+import Transfer from "../../Transfer";
+import Query from "../../Query";
+import { EcdhChannel } from '../../pruntime/crypto';
+import { ss58ToHex } from '../../utils';
 
 interface Props {
   accountId: string | null;

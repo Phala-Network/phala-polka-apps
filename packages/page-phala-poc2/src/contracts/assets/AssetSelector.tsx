@@ -14,8 +14,8 @@ import {EcdhChannel} from '../../pruntime/crypto';
 import { useTranslation } from '../../translate';
 
 import * as Models from './models';
-import { toApi } from '@polkadot/app-phala-poc2/pruntime/models';
-import { ss58ToHex } from '@polkadot/app-phala-poc2/utils';
+import { toApi } from '../../pruntime/models';
+import { ss58ToHex } from '../../utils';
 
 interface Props extends BareProps {
   contractId: number;
