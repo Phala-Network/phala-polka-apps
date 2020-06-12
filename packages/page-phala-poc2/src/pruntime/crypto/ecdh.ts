@@ -7,7 +7,7 @@ const kSymmetricAlgorithm = {name: 'AES-GCM', length: 256};
 export async function generateKeyPair(): Promise<CryptoKeyPair> {
   return await window.crypto.subtle.generateKey(
     kAlgorithm, kAllowExport,
-    ["deriveKey", "deriveBits"]);
+    ["deriveKey", "deriveBits"]) as CryptoKeyPair;
 }
 
 async function importPubkey(key: Uint8Array): Promise<CryptoKey> {
