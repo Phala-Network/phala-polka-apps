@@ -385,6 +385,7 @@
   "Set sudo key": "",
   "Set to 0 to make transaction immortal": "",
   "Set validator preferences": "",
+  "Settings": "",
   "Setup Nominator {{step}}/{{NUM_STEPS}}": "",
   "Setup Validator {{step}}/{{NUM_STEPS}}": "",
   "Setup account as recoverable": "",
