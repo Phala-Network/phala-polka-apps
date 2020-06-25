@@ -39,22 +39,12 @@ export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: P
     const pubkeyHex = ss58ToHex(recipientId);
     (async () => {
       let obj;
-      if (!assets) {
-        obj = {
-          Transfer: {
-            dest: pubkeyHex,
-            value: amount.toString()
-          }
-        };
-      } else {
-        obj = {
-          Transfer: {
-            id: assetId,
-            dest: pubkeyHex,
-            value: amount.toString()
-          }
-        };
-      }
+      obj = {
+        TransferToChain: {
+          dest: pubkeyHex,
+          value: amount.toString()
+        }
+      };
       console.log('obj', obj)
       const cipher = await encryptObj(ecdhChannel, obj);
       const apiCipher = toApi(cipher);
@@ -64,7 +54,7 @@ export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: P
 
   return (
     <section>
-      <h2>transfer</h2>
+      <h2>transfer to chain</h2>
       <div className='ui--row'>
         <div className='large'>
           <InputAddress
