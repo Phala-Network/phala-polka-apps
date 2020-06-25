@@ -5,6 +5,7 @@ import React from 'react';
 import BN from 'bn.js';
 
 import Transfer from "../../Transfer";
+import TransferToChain from "../../TransferToChain";
 import Query from "../../Query";
 import { EcdhChannel } from '../../pruntime/crypto';
 import { ss58ToHex } from '../../utils';
@@ -76,6 +77,11 @@ export default function BalancesTab ({accountId, ecdhChannel, pRuntimeEndpoint, 
     <>
       <h1>Balances</h1>
       <Transfer
+        assets={false}
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
+      />
+      <TransferToChain
         assets={false}
         accountId={accountId}
         ecdhChannel={ecdhChannel}
