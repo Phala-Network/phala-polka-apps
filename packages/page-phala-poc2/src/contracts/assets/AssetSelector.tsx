@@ -299,7 +299,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
               icon='send'
               label={t('Submit')}
               params={[contractId, commandIssue]}
-              tx='execution.pushCommand'
+              tx='phalaModule.pushCommand'
               onSuccess={() => {setIssueOpen(false)}}
             />
           </Button.Group>
@@ -329,7 +329,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
               icon='send'
               label={t('Confirm')}
               params={[contractId, commandDestroy]}
-              tx='execution.pushCommand'
+              tx='phalaModule.pushCommand'
               onSuccess={() => {setDestroyOpen(false)}}
             />
           </Button.Group>
