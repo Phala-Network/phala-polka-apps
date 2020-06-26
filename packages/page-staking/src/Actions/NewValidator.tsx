@@ -57,12 +57,12 @@ function NewValidator ({ isInElection }: Props): React.ReactElement<Props> {
         icon='add'
         isDisabled={isDisabled}
         key='new-validator'
-        label={t<string>('Validator')}
+        label={t<string>('Gatekeeper')}
         onClick={_toggle}
       />
       {isVisible && (
         <Modal
-          header={t<string>('Setup Validator {{step}}/{{NUM_STEPS}}', {
+          header={t<string>('Setup Gatekeeper {{step}}/{{NUM_STEPS}}', {
             replace: {
               NUM_STEPS,
               step

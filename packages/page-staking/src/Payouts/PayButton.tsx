@@ -103,7 +103,7 @@ function PayButton ({ isAll, isDisabled, payout }: Props): React.ReactElement<Pr
                 }
               </Modal.Column>
               <Modal.Column>
-                <p>{t<string>('All the listed validators and all their nominators will receive their rewards.')}</p>
+                <p>{t<string>('All the listed Gatekeepers and all their nominators will receive their rewards.')}</p>
               </Modal.Column>
             </Modal.Columns>
           </Modal.Content>

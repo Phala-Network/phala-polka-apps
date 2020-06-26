@@ -81,7 +81,7 @@ function StakingApp ({ basePath, className = '' }: Props): React.ReactElement<Pr
     {
       hasParams: true,
       name: 'query',
-      text: t<string>('Validator stats')
+      text: t<string>('Gatekeeper stats')
     }
   ].filter((q): q is { name: string; text: string } => !!q), [api, t]);
   const hiddenTabs = useMemo(

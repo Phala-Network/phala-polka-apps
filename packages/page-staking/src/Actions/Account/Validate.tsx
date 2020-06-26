@@ -22,7 +22,7 @@ function Validate ({ controllerId, onClose, stashId }: Props): React.ReactElemen
 
   return (
     <Modal
-      header={t<string>('Set validator preferences')}
+      header={t<string>('Set Gatekeeper preferences')}
       size='large'
     >
       <Modal.Content className='ui--signer-Signer-Content'>

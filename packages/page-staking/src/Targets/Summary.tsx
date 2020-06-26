@@ -60,7 +60,7 @@ function Summary ({ lastReward, numNominators, numValidators, totalStaked }: Pro
         </CardSummary>
       )}
       {numValidators && numNominators && (
-        <CardSummary label={t<string>('validators/nominators')}>
+        <CardSummary label={t<string>('gatekeepers/nominators')}>
           {numValidators}/{numNominators}
         </CardSummary>
       )}

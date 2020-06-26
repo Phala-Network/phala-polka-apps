@@ -143,7 +143,7 @@ function Nominate ({ className = '', controllerId, next, nominating, onChange, s
                     ))
                   }
                 />
-                <article className='warning'>{t<string>('The auto-selection is done on the current profitability of the validators taking your favorites into account. It is adjusted based on the commission and current range of backing for the validator. The calculation may and will change over time, so it is rather a selection based on the current state of the network, not a predictor of future profitability.')}</article>
+                <article className='warning'>{t<string>('The auto-selection is done on the current profitability of the Gatekeepers taking your favorites into account. It is adjusted based on the commission and current range of backing for the validator. The calculation may and will change over time, so it is rather a selection based on the current state of the network, not a predictor of future profitability.')}</article>
               </>
             )
             : (
@@ -164,7 +164,7 @@ function Nominate ({ className = '', controllerId, next, nominating, onChange, s
               isDisabled={!targets.validators?.length}
               label={
                 isAutoSelect
-                  ? t<string>('Use an automatic selection of the currently most profitable validators')
+                  ? t<string>('Use an automatic selection of the currently most profitable Gatekeepers')
                   : t<string>('Select targets manually (no auto-selection based on current profitability)')
               }
               onChange={_toggleAutoSelect}
@@ -173,7 +173,7 @@ function Nominate ({ className = '', controllerId, next, nominating, onChange, s
           )}
         </Modal.Column>
         <Modal.Column>
-          <p>{t<string>('Nominators can be selected automatically based on the current on-chain conditions or supplied manually as selected from the list of all currently available validators. In both cases, your favorites appear for the selection.')}</p>
+          <p>{t<string>('Nominators can be selected automatically based on the current on-chain conditions or supplied manually as selected from the list of all currently available Gatekeepers. In both cases, your favorites appear for the selection.')}</p>
           <p>{t<string>('Once transmitted the new selection will only take effect in 2 eras since the selection criteria for the next era was done at the end of the previous era. Until then, the nominations will show as inactive.')}</p>
         </Modal.Column>
       </Modal.Columns>

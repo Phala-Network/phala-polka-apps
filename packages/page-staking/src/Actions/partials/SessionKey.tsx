@@ -69,7 +69,7 @@ function SessionKey ({ className = '', controllerId, onChange, stashId, withSend
           />
         </Modal.Column>
         <Modal.Column>
-          <p>{t<string>('The hex output from author_rotateKeys, as executed on the validator node. The keys will show as pending until applied at the start of a new session.')}</p>
+          <p>{t<string>('The hex output from author_rotateKeys, as executed on the Gatekeeper node. The keys will show as pending until applied at the start of a new session.')}</p>
         </Modal.Column>
       </Modal.Columns>
     </div>

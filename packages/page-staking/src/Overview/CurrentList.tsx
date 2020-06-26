@@ -119,7 +119,7 @@ function CurrentList ({ hasQueries, isIntentions, next, setNominators, stakingOv
   ], [t]);
 
   const headerWaiting = useMemo(() => [
-    [t('validators'), 'start', 3],
+    [t('gatekeepers'), 'start', 3],
     [t('other stake')],
     [t('own stake')],
     [t('commission')],
@@ -165,7 +165,7 @@ function CurrentList ({ hasQueries, isIntentions, next, setNominators, stakingOv
   return isIntentions
     ? (
       <Table
-        empty={waiting && t<string>('No waiting validators found')}
+        empty={waiting && t<string>('No waiting Gatekeepers found')}
         header={headerActive}
       >
         {_renderRows(elected, false).concat(..._renderRows(waiting, false))}
@@ -173,7 +173,7 @@ function CurrentList ({ hasQueries, isIntentions, next, setNominators, stakingOv
     )
     : (
       <Table
-        empty={validators && t<string>('No active validators found')}
+        empty={validators && t<string>('No active Gatekeepers found')}
         filter={filter}
         header={headerWaiting}
       >
