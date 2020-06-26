@@ -145,7 +145,7 @@ function PhalaM2 ({ className, basePath }: Props): React.ReactElement<Props> {
           <Banner>
             <div className='box'>
               <div className='info'>
-                <p><strong>Phala Network testnet POC1</strong></p>
+                <p><strong>Phala Network testnet POC2</strong></p>
                 <p>Test only. The network may be reset randomly. pRuntime is running in development mode. So currently the confidentiality is not guaranteed.</p>
                 <p>Please select an account first.</p>
               </div>
