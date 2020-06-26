@@ -66,7 +66,7 @@ function Validate ({ className = '', controllerId, onChange, stashId, withSender
       <Modal.Columns>
         <Modal.Column>
           <InputNumber
-            help={t<string>('The percentage reward (0-100) that should be applied for the validator')}
+            help={t<string>('The percentage reward (0-100) that should be applied for the Gatekeeper')}
             isZeroable
             label={t<string>('reward commission percentage')}
             maxValue={MAX_COMM}

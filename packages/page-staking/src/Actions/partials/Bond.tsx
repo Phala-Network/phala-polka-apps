@@ -147,7 +147,7 @@ function Bond ({ className = '', onChange }: Props): React.ReactElement<Props> {
         <Modal.Column>
           <Dropdown
             defaultValue={0}
-            help={t<string>('The destination account for any payments as either a nominator or validator')}
+            help={t<string>('The destination account for any payments as either a nominator or Gatekeeper')}
             label={t<string>('payment destination')}
             onChange={setDestination}
             options={rewardDestinationOptions}

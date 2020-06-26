@@ -47,7 +47,7 @@ function SetRewardDestination ({ controllerId, defaultDestination, onClose, stas
           <Modal.Column>
             <Dropdown
               defaultValue={defaultDestination}
-              help={t<string>('The destination account for any payments as either a nominator or validator')}
+              help={t<string>('The destination account for any payments as either a nominator or Gatekeeper')}
               label={t<string>('payment destination')}
               onChange={setDestination}
               options={rewardDestinationOptions}

@@ -121,7 +121,7 @@ function CurrentList ({ hasQueries, isIntentions, next, stakingOverview }: Props
   ], [t]);
 
   const headerWaiting = useMemo(() => [
-    [t('validators'), 'start', 3],
+    [t('gatekeepers'), 'start', 3],
     [t('other stake')],
     [t('own stake')],
     [t('commission')],
@@ -157,7 +157,7 @@ function CurrentList ({ hasQueries, isIntentions, next, stakingOverview }: Props
   return isIntentions
     ? (
       <Table
-        empty={waiting && t<string>('No waiting validators found')}
+        empty={waiting && t<string>('No waiting Gatekeepers found')}
         filter={
           <Filtering
             nameFilter={nameFilter}
@@ -173,7 +173,7 @@ function CurrentList ({ hasQueries, isIntentions, next, stakingOverview }: Props
     )
     : (
       <Table
-        empty={validators && t<string>('No active validators found')}
+        empty={validators && t<string>('No active Gatekeepers found')}
         filter={
           <Filtering
             nameFilter={nameFilter}

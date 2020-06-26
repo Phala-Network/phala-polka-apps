@@ -94,7 +94,7 @@ function Actions ({ className = '', isInElection, next, ownStashes, targets, val
       </Button.Group>
       <ElectionBanner isInElection={isInElection} />
       <Table
-        empty={foundStashes && t<string>('No funds staked yet. Bond funds to validate or nominate a validator')}
+        empty={foundStashes && t<string>('No funds staked yet. Bond funds to validate or nominate a Gatekeeper')}
         footer={footer}
         header={header}
       >

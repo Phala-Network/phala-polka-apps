@@ -92,11 +92,11 @@ function InjectKeys ({ onClose }: Props): React.ReactElement<Props> | null {
               value={suri}
             />
             <article className='warning'>
-              <div><Icon icon='exclamation-triangle' />{t<string>('This operation will submit the seed via an RPC call. Do not perform this operation on a public RPC node, but ensure that the node is local, connected to your validator and secure.')}</div>
+              <div><Icon icon='exclamation-triangle' />{t<string>('This operation will submit the seed via an RPC call. Do not perform this operation on a public RPC node, but ensure that the node is local, connected to your Gatekeeper and secure.')}</div>
             </article>
           </Modal.Column>
           <Modal.Column>
-            <p>{t<string>('The seed and derivation path will be submitted to the validator node. this is an advanced operation, only to be performed when you are sure of the security and connection risks.')}</p>
+            <p>{t<string>('The seed and derivation path will be submitted to the Gatekeeper node. this is an advanced operation, only to be performed when you are sure of the security and connection risks.')}</p>
           </Modal.Column>
         </Modal.Columns>
         <Modal.Columns>

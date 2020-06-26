@@ -28,7 +28,7 @@ function Summary ({ className = '', isVisible, next, nominators, stakingOverview
     <SummaryBox className={`${className} ${!isVisible ? 'staking--hidden' : ''}`}>
       <section>
         {stakingOverview && (
-          <CardSummary label={t<string>('validators')}>
+          <CardSummary label={t<string>('gatekeepers')}>
             {stakingOverview.validators.length}{`/${stakingOverview.validatorCount.toString()}`}
           </CardSummary>
         )}

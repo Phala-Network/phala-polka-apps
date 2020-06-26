@@ -240,7 +240,7 @@ function Account ({ className = '', info: { controllerId, destination, destinati
                       disabled={!isOwnController}
                       onClick={toggleValidate}
                     >
-                      {t<string>('Change validator preferences')}
+                      {t<string>('Change Gatekeeper preferences')}
                     </Menu.Item>
                   }
                   <Menu.Divider />

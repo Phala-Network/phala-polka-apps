@@ -77,7 +77,7 @@ function Unbond ({ className = '', controllerId, onClose, stakingLedger, stashId
             )}
           </Modal.Column>
           <Modal.Column>
-            <p>{t<string>('The funds will only be available for withdrawal after the unbonding period, however will not be part of the staked amount after the next validator election. You can follow the unlock countdown in the UI.')}</p>
+            <p>{t<string>('The funds will only be available for withdrawal after the unbonding period, however will not be part of the staked amount after the next Gatekeeper election. You can follow the unlock countdown in the UI.')}</p>
           </Modal.Column>
         </Modal.Columns>
       </Modal.Content>

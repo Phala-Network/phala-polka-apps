@@ -59,7 +59,7 @@ function Nominate ({ className = '', isDisabled, ownNominators, targets }: Props
       {isOpen && (
         <Modal
           className={className}
-          header={t<string>('Nominate validators')}
+          header={t<string>('Nominate Gatekeepers')}
           size='large'
         >
           <Modal.Content>
@@ -85,7 +85,7 @@ function Nominate ({ className = '', isDisabled, ownNominators, targets }: Props
             <Modal.Columns>
               <Modal.Column>
                 <Static
-                  label={t<string>('selected validators')}
+                  label={t<string>('selected gatekeepers')}
                   value={
                     targets.map((validatorId) => (
                       <AddressMini
@@ -98,7 +98,7 @@ function Nominate ({ className = '', isDisabled, ownNominators, targets }: Props
                 />
               </Modal.Column>
               <Modal.Column>
-                <p>{t<string>('The selected validators to nominate, either via the "currently best algorithm" or via a manual selection.')}</p>
+                <p>{t<string>('The selected Gatekeepers to nominate, either via the "currently best algorithm" or via a manual selection.')}</p>
                 <p>{t<string>('Once transmitted the new selection will only take effect in 2 eras since the selection criteria for the next era was done at the end of the previous era. Until then, the nominations will show as inactive.')}</p>
               </Modal.Column>
             </Modal.Columns>
