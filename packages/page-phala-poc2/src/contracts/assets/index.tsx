@@ -5,7 +5,7 @@ import React from 'react';
 import BN from 'bn.js';
 
 import Transfer from "../../Transfer";
-import Query from "../../Query";
+import Query, { QueryPlan } from "../../Query";
 import { EcdhChannel } from '../../pruntime/crypto';
 import { ss58ToHex } from '../../utils';
 
@@ -25,12 +25,12 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, ke
   function findAsset(result: Models.MetadataResp): Models.AssetMetadata | null {
     return result.metadata.find(m => m.id == assetId!) || null;
   }
-  const queryPlan = [{
+  const queryPlan: QueryPlan[] = [{
     query: 'Metadata',
     buttons: [{
       props: {
         label: 'TotalSupply',
-        icon: 'money bill alternate outline',
+        icon: 'money-bill-alt',
         isPrimary: true,
         isNegative: false,
       }
@@ -39,7 +39,7 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, ke
       props: {
         label: 'total supply',
         color: 'teal',
-        icon: 'money bill alternate outline',
+        icon: 'money-bill-alt',
       },
       render (result: Models.MetadataResp) {
         return (<Balance balance={new BN(findAsset(result)!.totalSupply)} params={'dummy'} />);

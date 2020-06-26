@@ -80,7 +80,7 @@ export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: P
             <TxButton
               isDisabled={!ready}
               accountId={accountId}
-              icon='send'
+              icon='paper-plane'
               label='make transfer'
               params={[contractId, command]}
               tx='phalaModule.pushCommand'

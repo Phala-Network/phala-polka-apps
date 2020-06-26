@@ -100,7 +100,7 @@ export default function Query ({ contractId, accountId, ecdhChannel, pRuntimeEnd
                      </Bubble>))
             }
             { queryResult?.Error && (
-              <Bubble color='red' icon='minus circle' label='error'>
+              <Bubble color='red' icon='minus-circle' label='error'>
                 {formatError(queryResult.Error)}
               </Bubble>
             )}

@@ -34,7 +34,7 @@ function AccountSelector ({ className, onChange }: Props): React.ReactElement<Pr
       </div>
       <div className='ui--row align-right'>
         <div className='large'>
-            <Bubble color='teal' icon='address card' label='index'>
+            <Bubble color='teal' icon='address-card' label='index'>
               <AccountIndex value={accountId} />
             </Bubble>
             <Bubble color='yellow' icon='adjust' label='balance'>

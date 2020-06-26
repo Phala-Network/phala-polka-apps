@@ -287,7 +287,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
         <Modal.Actions onCancel={() => {setIssueOpen(false)}}>
           <Button.Group>
             <Button
-              icon='cancel'
+              icon='times'
               isNegative
               label={t('Cancel')}
               onClick={() => {setIssueOpen(false)}}
@@ -296,7 +296,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
             <TxButton
               isDisabled={!isSymbolValid || !totalSupply || !commandIssue}
               accountId={accountId}
-              icon='send'
+              icon='paper-plane'
               label={t('Submit')}
               params={[contractId, commandIssue]}
               tx='phalaModule.pushCommand'
@@ -317,7 +317,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
         <Modal.Actions onCancel={() => {setDestroyOpen(false)}}>
           <Button.Group>
             <Button
-              icon='cancel'
+              icon='times'
               isNegative
               label={t('Cancel')}
               onClick={() => {setDestroyOpen(false)}}
@@ -326,7 +326,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
             <TxButton
               isDisabled={!commandDestroy}
               accountId={accountId}
-              icon='send'
+              icon='paper-plane'
               label={t('Confirm')}
               params={[contractId, commandDestroy]}
               tx='phalaModule.pushCommand'

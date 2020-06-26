@@ -6,7 +6,7 @@ import BN from 'bn.js';
 
 import Transfer from "../../Transfer";
 import TransferToChain from "../../TransferToChain";
-import Query from "../../Query";
+import Query, {QueryPlan} from "../../Query";
 import { EcdhChannel } from '../../pruntime/crypto';
 import { ss58ToHex } from '../../utils';
 
@@ -18,12 +18,12 @@ interface Props {
 }
 
 export default function BalancesTab ({accountId, ecdhChannel, pRuntimeEndpoint, keypair}: Props): React.ReactElement<Props> {
-  const queryPlan = [{
+  const queryPlan: QueryPlan[] = [{
     query: 'TotalIssuance',
     buttons: [{
       props: {
         label: 'TotalIssuance',
-        icon: 'money bill alternate outline',
+        icon: 'money-bill-alt',
         isPrimary: true,
         isNegative: false,
       }
@@ -32,7 +32,7 @@ export default function BalancesTab ({accountId, ecdhChannel, pRuntimeEndpoint, 
       props: {
         label: 'total issuance',
         color: 'teal',
-        icon: 'money bill alternate outline',
+        icon: 'money-bill-alt',
       },
       render (result: any) {
         return (<Balance balance={new BN(result.totalIssuance)} params={'dummy'} />);
