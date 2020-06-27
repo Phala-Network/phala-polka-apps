@@ -107,7 +107,7 @@ function PhalaM2 ({ className, basePath }: Props): React.ReactElement<Props> {
     <main className={className}>
       <Tabs
           basePath={basePath}
-          hidden={(keypair && !keypair.isLocked) ? [] : ['assets', 'balances']}
+          hidden={(keypair && !keypair.isLocked) ? ['balances'] : ['assets', 'balances']}
           items={[
             {
               name: 'assets',
