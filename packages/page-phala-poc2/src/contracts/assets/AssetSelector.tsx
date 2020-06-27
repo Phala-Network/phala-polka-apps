@@ -265,34 +265,26 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
         <Summary className='small'>Select an asset or issue your own asset.</Summary>
       </div>
 
-      <Modal
-        header={t('Create Token')}
-        open={issueOpen}
-        size='small'
-      >
-        <Modal.Content>
-          <Input
-            className='full'
-            help={t('Enter the symbol of the token you will create.')}
-            isError={!isSymbolValid}
-            label={t('symbol')}
-            onChange={_onChangeSymbol}
-            value={symbol}
-          />
-          <InputBalance
-            label={t('total supply')}
-            onChange={setTotalSupply}
-          />
-        </Modal.Content>
-        <Modal.Actions onCancel={() => {setIssueOpen(false)}}>
-          <Button.Group>
-            <Button
-              icon='times'
-              isNegative
-              label={t('Cancel')}
-              onClick={() => {setIssueOpen(false)}}
+      {issueOpen && (
+        <Modal
+          header={t('Create Token')}
+          size='small'
+        >
+          <Modal.Content>
+            <Input
+              className='full'
+              help={t('Enter the symbol of the token you will create.')}
+              isError={!isSymbolValid}
+              label={t('symbol')}
+              onChange={_onChangeSymbol}
+              value={symbol}
             />
-            <Button.Or />
+            <InputBalance
+              label={t('total supply')}
+              onChange={setTotalSupply}
+            />
+          </Modal.Content>
+          <Modal.Actions onCancel={() => {setIssueOpen(false)}}>
             <TxButton
               isDisabled={!isSymbolValid || !totalSupply || !commandIssue}
               accountId={accountId}
@@ -302,27 +294,20 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
               tx='phalaModule.pushCommand'
               onSuccess={() => {setIssueOpen(false)}}
             />
-          </Button.Group>
-        </Modal.Actions>
-      </Modal>
+          </Modal.Actions>
+        </Modal>
+      )}
 
-      <Modal
-        header={t('Destroy Token')}
-        open={destroyOpen}
-        size='small'
-      >
-        <Modal.Content>
-          <p>I confirm to destroy my token '{selectedAsset()?.symbol}' (asset id: {selectedAsset()?.id})</p>
-        </Modal.Content>
-        <Modal.Actions onCancel={() => {setDestroyOpen(false)}}>
-          <Button.Group>
-            <Button
-              icon='times'
-              isNegative
-              label={t('Cancel')}
-              onClick={() => {setDestroyOpen(false)}}
-            />
-            <Button.Or />
+      { destroyOpen && (
+        <Modal
+          header={t('Destroy Token')}
+          open={destroyOpen}
+          size='small'
+        >
+          <Modal.Content>
+            <p>I confirm to destroy my token '{selectedAsset()?.symbol}' (asset id: {selectedAsset()?.id})</p>
+          </Modal.Content>
+          <Modal.Actions onCancel={() => {setDestroyOpen(false)}}>
             <TxButton
               isDisabled={!commandDestroy}
               accountId={accountId}
@@ -332,9 +317,9 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
               tx='phalaModule.pushCommand'
               onSuccess={() => {setDestroyOpen(false)}}
             />
-          </Button.Group>
-        </Modal.Actions>
-      </Modal>
+          </Modal.Actions>
+        </Modal>
+      )}
     </section>
   );
 }
