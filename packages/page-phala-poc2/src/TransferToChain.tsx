@@ -27,6 +27,7 @@ export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: P
 
   // 2: Balances, 3: Assets
   const contractId = assets ? 3 : 2;
+  const symbol = 'PHA';
 
   React.useEffect(() => {
     if (!ecdhChannel || !ecdhChannel.core.remotePubkey || !recipientId || !amount || (assets && assetId == undefined)) {
@@ -65,6 +66,7 @@ export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: P
           <InputBalance
             label='amount to transfer'
             onChange={setAmount}
+            tokenUnit={symbol}
           />
           <Button.Group>
             <TxButton

@@ -20,7 +20,7 @@ interface Props {
 }
 
 export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, keypair}: Props): React.ReactElement<Props> {
-  const [assetId, setAssetId] = React.useState(0);
+  const [[assetId, assetSymbol], setAsset] = React.useState([0, 'TTT']);
 
   function findAsset(result: Models.MetadataResp): Models.AssetMetadata | null {
     return result.metadata.find(m => m.id == assetId!) || null;
@@ -88,7 +88,7 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, ke
         ecdhChannel={ecdhChannel}
         pRuntimeEndpoint={pRuntimeEndpoint}
         contractId={3}
-        onChange={m => setAssetId(m.id)}
+        onChange={m => setAsset([m.id, m.symbol])}
         keypair={keypair}
       />
       <Query
@@ -102,6 +102,7 @@ export default function AssetsTab ({accountId, ecdhChannel, pRuntimeEndpoint, ke
       <Transfer
         assets={true}
         assetId={assetId}
+        assetSymbol={assetSymbol}
         accountId={accountId}
         ecdhChannel={ecdhChannel}
       />

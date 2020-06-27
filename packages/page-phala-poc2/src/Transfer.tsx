@@ -16,10 +16,11 @@ interface Props {
   accountId?: string | null;
   assets: boolean;
   assetId?: number;
+  assetSymbol?: string;
   ecdhChannel: EcdhChannel | null;
 }
 
-export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: Props): React.ReactElement<Props> {
+export default function Transfer ({ accountId, assets, assetId, assetSymbol, ecdhChannel }: Props): React.ReactElement<Props> {
   const [amount, setAmount] = useState<BN | undefined | null>(null);
   const [recipientId, setRecipientId] = useState<string | null>(null);
   const [command, setCommand] = useState('');
@@ -27,6 +28,7 @@ export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: P
 
   // 2: Balances, 3: Assets
   const contractId = assets ? 3 : 2;
+  const symbol = assets ? (assetSymbol || 'Unit') : 'PHA';
 
   React.useEffect(() => {
     if (!ecdhChannel || !ecdhChannel.core.remotePubkey || !recipientId || !amount || (assets && assetId == undefined)) {
@@ -75,6 +77,7 @@ export default function Transfer ({ accountId, assets, assetId, ecdhChannel }: P
           <InputBalance
             label='amount to transfer'
             onChange={setAmount}
+            tokenUnit={symbol}
           />
           <Button.Group>
             <TxButton

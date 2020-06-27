@@ -28,18 +28,14 @@ interface Props extends BareProps {
 
 const mockMetadata: Models.MetadataResp = { metadata: [] };
 
-// for million, 2 * 3-grouping + comma
-const M_LENGTH = 6 + 1;
-
 function formatAssetBalance (asset: Models.AssetMetadata) {
-  const [prefix, postfix] = formatBalance(asset.totalSupply, { forceUnit: '-', withSi: false }).split('.');
-
-  if (prefix.length > M_LENGTH) {
-    // TODO Format with balance-postfix
-    return formatBalance(asset.totalSupply);
-  }
-
-  return <>{prefix}.<span className='balance-postfix'>{`000${postfix || ''}`.slice(-3)}</span></>;
+  const formatted = formatBalance(
+    asset.totalSupply, { withSi: true, withUnit: asset.symbol });
+  const m = formatted.match(/(\d+\.?)(\d+)(\w?( \w+)?)/)!;
+  return (
+  <>
+      {m[1]}<BalancePostfixSpan className='balance-postfix'>{(m[2]+'000').slice(0, 3)}</BalancePostfixSpan>{m[3]}
+  </>);
 }
 
 type MetadataQueryResult = {Metadata: Models.MetadataResp};
@@ -56,6 +52,10 @@ const MetadataDetailContainer = styled.div`
     overflow: scroll;
     max-height: 200px;
   }
+`;
+
+const BalancePostfixSpan = styled.span`
+  color: rgba(78, 78, 78, .4);
 `;
 
 function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, onChange, keypair}: Props): React.ReactElement<Props> {
@@ -282,6 +282,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
             <InputBalance
               label={t('total supply')}
               onChange={setTotalSupply}
+              tokenUnit={symbol || 'Unit'}
             />
           </Modal.Content>
           <Modal.Actions onCancel={() => {setIssueOpen(false)}}>

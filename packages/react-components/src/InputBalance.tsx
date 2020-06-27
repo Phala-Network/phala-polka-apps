@@ -27,6 +27,7 @@ interface Props extends BareProps {
   onEnter?: () => void;
   onEscape?: () => void;
   placeholder?: string;
+  tokenUnit?: string;
   value?: BN;
   withEllipsis?: boolean;
   withLabel?: boolean;
@@ -55,7 +56,7 @@ function reformat (value: string | BN, isDisabled?: boolean): string {
   return formatBalance(value, { forceUnit: '-', withSi: false }).replace(',', isDisabled ? ',' : '');
 }
 
-function InputBalance ({ autoFocus, children, className = '', defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, labelExtra, maxValue, onChange, onEnter, onEscape, placeholder, value, withEllipsis, withLabel, withMax }: Props): React.ReactElement<Props> {
+function InputBalance ({ autoFocus, children, className = '', defaultValue: inDefault, help, isDisabled, isError, isFull, isWarning, isZeroable, label, labelExtra, maxValue, onChange, onEnter, onEscape, placeholder, tokenUnit, value, withEllipsis, withLabel, withMax }: Props): React.ReactElement<Props> {
   const [defaultValue, setDefaultValue] = useState<string | undefined>();
 
   useEffect((): void => {
@@ -84,6 +85,7 @@ function InputBalance ({ autoFocus, children, className = '', defaultValue: inDe
       onEnter={onEnter}
       onEscape={onEscape}
       placeholder={placeholder}
+      tokenUnit={tokenUnit}
       value={value}
       withEllipsis={withEllipsis}
       withLabel={withLabel}

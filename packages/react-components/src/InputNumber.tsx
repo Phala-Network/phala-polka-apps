@@ -35,6 +35,7 @@ interface Props extends BareProps {
   onEnter?: () => void;
   onEscape?: () => void;
   placeholder?: string;
+  tokenUnit?: string;
   value?: BN | null;
   withEllipsis?: boolean;
   withLabel?: boolean;
@@ -63,10 +64,10 @@ function getRegex (isDecimal: boolean): RegExp {
   );
 }
 
-function getSiOptions (): { text: string; value: string }[] {
+function getSiOptions (tokenUnit?: string): { text: string; value: string }[] {
   return formatBalance.getOptions().map(({ power, text, value }): { text: string; value: string } => ({
     text: power === 0
-      ? TokenUnit.abbr
+      ? (tokenUnit || TokenUnit.abbr)
       : text,
     value
   }));
@@ -160,7 +161,7 @@ function getValues (value: BN | string = BN_ZERO, si: SiDef | null, bitLength: B
     : getValuesFromString(value, si, bitLength, isZeroable, maxValue);
 }
 
-function InputNumber ({ autoFocus, bitLength = DEFAULT_BITLENGTH, children, className = '', defaultValue, help, isDecimal, isFull, isSi, isDisabled, isError = false, isWarning, isZeroable = true, label, labelExtra, maxLength, maxValue, onChange, onEnter, onEscape, placeholder, value: propsValue }: Props): React.ReactElement<Props> {
+function InputNumber ({ autoFocus, bitLength = DEFAULT_BITLENGTH, children, className = '', defaultValue, help, isDecimal, isFull, isSi, isDisabled, isError = false, isWarning, isZeroable = true, label, labelExtra, maxLength, maxValue, onChange, onEnter, onEscape, placeholder, tokenUnit, value: propsValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [si, setSi] = useState<SiDef | null>(isSi ? formatBalance.findSi('-') : null);
   const [isPreKeyDown, setIsPreKeyDown] = useState(false);
@@ -269,7 +270,7 @@ function InputNumber ({ autoFocus, bitLength = DEFAULT_BITLENGTH, children, clas
           dropdownClassName='ui--SiDropdown'
           isButton
           onChange={_onSelectSiUnit}
-          options={getSiOptions()}
+          options={getSiOptions(tokenUnit)}
         />
       )}
       {children}
