@@ -17,3 +17,16 @@ export interface AssetMetadata {
   symbol: string;
   id: number;
 }
+
+export interface ListAssetsReq {
+  availableOnly: boolean;
+}
+
+export interface ListAssetsResp {
+  assets: Array<AssetMetadataBalance>;
+}
+
+export interface AssetMetadataBalance {
+  metadata: AssetMetadata;
+  balance: string;
+}

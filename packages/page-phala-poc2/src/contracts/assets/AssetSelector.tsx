@@ -26,7 +26,7 @@ interface Props extends BareProps {
   keypair: KeyringPair | null;
 }
 
-const mockMetadata: Models.MetadataResp = { metadata: [] };
+const mockMetadata: Models.ListAssetsResp = { assets: [] };
 
 function formatAssetBalance (asset: Models.AssetMetadata) {
   const formatted = formatBalance(
@@ -38,7 +38,7 @@ function formatAssetBalance (asset: Models.AssetMetadata) {
   </>);
 }
 
-type MetadataQueryResult = {Metadata: Models.MetadataResp};
+type ListAssetsQueryResult = {ListAssets: Models.ListAssetsResp};
 
 interface AssetOption {
   text: string;
@@ -61,14 +61,15 @@ const BalancePostfixSpan = styled.span`
 function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, onChange, keypair}: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
-  const [queryResult, setQueryResult] = useState<MetadataQueryResult | null>({
-    Metadata: mockMetadata
+  const [queryResult, setQueryResult] = useState<ListAssetsQueryResult | null>({
+    ListAssets: mockMetadata
   });
 
   async function queryMetadata() {
+    const query: Models.ListAssetsReq = { availableOnly: false };
     const result: object = await new PRuntime(pRuntimeEndpoint).query(
-      contractId, 'Metadata', ecdhChannel!, keypair!);
-    setQueryResult(result as MetadataQueryResult);
+      contractId, { ListAssets: query }, ecdhChannel!, keypair!);
+    setQueryResult(result as ListAssetsQueryResult);
   }
 
   React.useEffect(() => {
@@ -80,11 +81,11 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
 
   const [assetId, setAssetId] = useState<number | null>(null);
 
-  function findAsset(result: Models.MetadataResp, id: number): Models.AssetMetadata | null {
-    return result.metadata.find(m => m.id == id) || null;
+  function findAsset(result: Models.ListAssetsResp, id: number): Models.AssetMetadata | null {
+    return result.assets.find(a => a.metadata.id == id)?.metadata || null;
   }
   function selectedAsset(): Models.AssetMetadata | null {
-    return queryResult && assetId != null && findAsset(queryResult.Metadata, assetId) || null;
+    return queryResult && assetId != null && findAsset(queryResult.ListAssets, assetId) || null;
   }
   function selectedIsMine(): boolean {
     if (!accountId) {
@@ -100,7 +101,7 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
     }
     setAssetId(i);
     console.log(queryResult, i);
-    const asset = findAsset(queryResult!.Metadata, i)!;
+    const asset = findAsset(queryResult!.ListAssets, i)!;
     onChange(asset);
   }
 
@@ -138,9 +139,9 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
     if (val.length > 9) {
       return 'too-long';
     }
-    if (queryResult?.Metadata.metadata) {
-      const tokens = queryResult.Metadata.metadata;
-      if (tokens.find(t => t.symbol.toLowerCase() == val.toLowerCase())) {
+    if (queryResult?.ListAssets.assets) {
+      const tokens = queryResult.ListAssets.assets;
+      if (tokens.map(a => a.metadata).find(t => t.symbol.toLowerCase() == val.toLowerCase())) {
         return 'conflict-symbol';
       }
     }
@@ -203,13 +204,15 @@ function AssetSelector ({ contractId, accountId, ecdhChannel, pRuntimeEndpoint, 
           <Dropdown
             // className='medium'
             help={t('Select an issued asset on the blockchain')}
-            isDisabled={!(queryResult?.Metadata?.metadata)}
+            isDisabled={!(queryResult?.ListAssets?.assets)}
             label={t('Select asset')}
             options={
-              queryResult?.Metadata?.metadata.map((a: Models.AssetMetadata): AssetOption => ({
-                text: a.symbol,
-                value: a.id
-              })) || []
+              queryResult?.ListAssets?.assets
+                .map(a => a.metadata)
+                .map((a: Models.AssetMetadata): AssetOption => ({
+                  text: a.symbol,
+                  value: a.id
+                })) || []
             }
             onSearch={onSearch}
             onChange={internalOnChange}
