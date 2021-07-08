@@ -7,6 +7,7 @@ import BN from 'bn.js';
 import Transfer from "../../Transfer";
 import TransferToChain from "../../TransferToChain";
 import Query, {QueryPlan} from "../../Query";
+import QueryReceipt from "../../QueryReceipt";
 import { EcdhChannel } from '../../pruntime/crypto';
 import { ss58ToHex } from '../../utils';
 
@@ -88,6 +89,14 @@ export default function BalancesTab ({accountId, ecdhChannel, pRuntimeEndpoint, 
       />
       <Query
         contractId={2}
+        accountId={accountId}
+        ecdhChannel={ecdhChannel}
+        pRuntimeEndpoint={pRuntimeEndpoint}
+        plans={queryPlan}
+        keypair={keypair}
+      />
+      <QueryReceipt
+        contractId={0}
         accountId={accountId}
         ecdhChannel={ecdhChannel}
         pRuntimeEndpoint={pRuntimeEndpoint}
